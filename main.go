@@ -1,33 +1,31 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
-
+	"github.com/gin-gonic/gin"
 	"placemaking-backend-go/config"
 	"placemaking-backend-go/controllers"
-
-	"github.com/gin-gonic/gin"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	// Inicializar Supabase
-	config.InitSupabase()
-
-	// Criar uma nova instância do Gin
+// setupRouter configura as rotas
+func setupRouter() *gin.Engine {
 	router := gin.Default()
 
-	// Criar uma rota de teste para ver se a Vercel está servindo corretamente
-	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Server is running on Vercel!")
-	})
+	api := router.Group("/api")
+	{
+		api.GET("/input_types", controllers.GetInputTypes)
+	}
 
-	// Adicionar rota manualmente
-	router.GET("/api/input_types", controllers.GetInputTypes)
+	return router
+}
 
-	// Log para debugar
-	fmt.Println("Handler executado - Rotas registradas")
+// Handler é a única função exportada, usada pelo Vercel
+func Handler(w http.ResponseWriter, r *http.Request) {
+	// Inicializa Supabase antes de rodar as rotas
+	config.InitSupabase()
 
-	// Servir a requisição
+	// Cria o router e serve a requisição
+	router := setupRouter()
 	router.ServeHTTP(w, r)
 }
+
