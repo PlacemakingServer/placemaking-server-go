@@ -14,5 +14,5 @@ func GetInputTypes(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": inputTypes})
+	c.JSON(http.StatusOK, gin.H{"message": "Lista de tipos de entrada encontrados.","input_types": inputTypes})
 }

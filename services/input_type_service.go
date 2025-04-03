@@ -2,7 +2,7 @@ package services
 
 import (
     "placemaking-backend-go/models"
-    "placemaking-backend-go/repositories"
+    repository "placemaking-backend-go/repositories"
 )
 
 func FetchInputTypes() ([]models.InputType, error) {
