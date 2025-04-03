@@ -1,16 +1,13 @@
-package handler
+package main
 
 import (
-	"log"
 	"net/http"
-	"os"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"placemaking-backend-go/config"
 	"placemaking-backend-go/controllers"
 )
 
-// setupRouter configura as rotas da API
+// setupRouter configura as rotas
 func setupRouter() *gin.Engine {
 	router := gin.Default()
 
@@ -22,31 +19,13 @@ func setupRouter() *gin.Engine {
 	return router
 }
 
-// Handler é a função usada pelo Vercel
+// Handler é a única função exportada, usada pelo Vercel
 func Handler(w http.ResponseWriter, r *http.Request) {
+	// Inicializa Supabase antes de rodar as rotas
+	config.InitSupabase()
+
+	// Cria o router e serve a requisição
 	router := setupRouter()
 	router.ServeHTTP(w, r)
 }
 
-// main é usado para rodar localmente
-func main() {
-	// Carregar variáveis do .env localmente
-	_ = godotenv.Load()
-
-	// Inicializar Supabase
-	config.InitSupabase()
-
-	// Verificar se está rodando na Vercel
-	if os.Getenv("VERCEL") != "" {
-		log.Println("Rodando na Vercel...")
-		return
-	}
-
-	// Rodar localmente
-	router := setupRouter()
-	log.Println("Server running on port 8080...")
-	err := router.Run(":8080")
-	if err != nil {
-		log.Fatal("Error starting server:", err)
-	}
-}
