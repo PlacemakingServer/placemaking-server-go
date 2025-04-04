@@ -1,20 +1,14 @@
 package models
 
-import (
-	"log"
-	"placemaking-backend-go/utils"
-	"time"
-)
-
 type Token struct {
 	ID         string    `json:"id"`
 	User_id    string    `json:"user_id"`
 	Token      string    `json:"token"`
 	TokenType  string    `json:"token_type"`
 	Active     bool      `json:"active"`
-	Created_at string    `json:"created_at"`
-	Updated_at string    `json:"updated_at"`
-	Expires_at time.Time `json:"expires_at"`
+	Created_at string `json:"created_at"`
+	Updated_at string `json:"updated_at"`
+	Expires_at string `json:"expires_at"`
 }
 
 // SanitizedToken representa o token sem informações sensíveis.
@@ -30,26 +24,7 @@ func SanitizeToken(token Token) SanitizedToken {
 	return SanitizedToken{
 		Token:     token.Token,
 		TokenType: token.TokenType,
-		ExpiresAt: token.Expires_at.Format(time.RFC3339),
+		ExpiresAt: token.Expires_at,
 		CreatedAt: token.Created_at,
-	}
-}
-
-// Método para converter as strings em time.Time
-func (u *Token) ConvertTimestamps() {
-	var err error
-	u.Created_at, err = utils.ParseTimestamp(u.Created_at)
-	if err != nil {
-		log.Println("Erro ao converter CreatedAt:", err)
-	}
-
-	u.Updated_at, err = utils.ParseTimestamp(u.Updated_at)
-	if err != nil {
-		log.Println("Erro ao converter UpdatedAt:", err)
-	}
-
-	u.Updated_at, err = utils.ParseTimestamp(u.Expires_at.String())
-	if err != nil {
-		log.Println("Erro ao converter UpdatedAt:", err)
 	}
 }

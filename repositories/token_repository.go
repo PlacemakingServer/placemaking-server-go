@@ -56,16 +56,23 @@ func InsertToken(userID string, token string, tokenType string, expiresAt time.T
 
 	newToken := models.Token{
 		User_id:    userID,
-		Token:     token,
-		TokenType: tokenType,
-		Expires_at: expiresAt,
-		Created_at: time.Now().String(),
-		Active:    true,
+		Token:      token,
+		TokenType:  tokenType,
+		Expires_at: expiresAt.Format(time.RFC3339), // Garante o formato correto
+		Created_at: time.Now().Format(time.RFC3339),
+		Active:     true,
 	}
 
 	var insertedTokens []models.Token
 	_, err := supabase.From("tokens").
-		Insert(newToken,false,"","","").
+		Insert(map[string]interface{}{
+			"user_id":    newToken.User_id,
+			"token":      newToken.Token,
+			"token_type": newToken.TokenType,
+			"expires_at": newToken.Expires_at, // Converte time.Time para string no formato ISO 8601
+			"created_at": newToken.Created_at,
+			"active":     newToken.Active,
+		}, false, "", "", "").
 		ExecuteTo(&insertedTokens)
 
 	if err != nil {
@@ -83,13 +90,11 @@ func InsertToken(userID string, token string, tokenType string, expiresAt time.T
 func RevokeToken(token string) error {
 	supabase := db.GetSupabase()
 
-	data, _, err := supabase.From("tokens").
-		Update(map[string]interface{}{"active": false},"","").
+	_ ,_, err := supabase.From("tokens").
+		Update(map[string]interface{}{"active": false}, "", "").
 		Eq("token", token).
 		Execute()
 
-	log.Println(data)
-	
 	if err != nil {
 		log.Println("[RevokeToken] Erro:", err)
 		return err
@@ -101,13 +106,11 @@ func RevokeToken(token string) error {
 func RevokeAllTokensByUserID(userID string, tokenType string) error {
 	supabase := db.GetSupabase()
 
-	data, _, err := supabase.From("tokens").
+	_, _, err := supabase.From("tokens").
 		Update(map[string]interface{}{"active": false}, "", "").
 		Eq("user_id", userID).
 		Eq("token_type", tokenType).
 		Execute()
-
-	log.Println(data)
 
 	if err != nil {
 		log.Println("[RevokeAllTokensByUserID] Erro:", err)

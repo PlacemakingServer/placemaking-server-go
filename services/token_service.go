@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 	"time"
-
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"placemaking-backend-go/config"
 	"placemaking-backend-go/models"
@@ -19,7 +19,16 @@ func GenerateUserToken(user models.User, tokenType string) (*models.Token, error
 	if tokenType == "Bearer" {
 		existingToken, err := repository.GetTokenByUserID(user.ID, tokenType)
 		if err == nil && existingToken != nil && existingToken.Active {
-			if existingToken.Expires_at.After(time.Now()) {
+			// Converter string Expires_at para time.Time
+			layout := time.RFC3339
+			expiresAt, err := time.Parse(layout, existingToken.Expires_at)
+			if err != nil {
+				log.Println("[GenerateUserToken] Erro ao converter Expires_at:", err)
+				return nil, err
+			}
+
+			// Verifica se o token ainda é válido
+			if expiresAt.After(time.Now()) {
 				return existingToken, nil
 			}
 		}
@@ -34,11 +43,28 @@ func GenerateUserToken(user models.User, tokenType string) (*models.Token, error
 		newTokenData = GenerateRecoverPasswordToken()
 	}
 
+	// Certificar que newTokenData["expires_at"] está no formato correto
+	var expiresAt time.Time
+	switch v := newTokenData["expires_at"].(type) {
+	case string:
+		layout := time.RFC3339
+		var err error
+		expiresAt, err = time.Parse(layout, v)
+		if err != nil {
+			log.Println("[GenerateUserToken] Erro ao converter expires_at:", err)
+			return nil, err
+		}
+	case time.Time:
+		expiresAt = v
+	default:
+		return nil, fmt.Errorf("[GenerateUserToken] Tipo inesperado para expires_at: %T", v)
+	}
+
 	token, err := repository.InsertToken(
 		user.ID,
 		newTokenData["token"].(string),
 		tokenType,
-		newTokenData["expires_at"].(time.Time),
+		expiresAt,
 	)
 
 	if err != nil {
@@ -48,6 +74,7 @@ func GenerateUserToken(user models.User, tokenType string) (*models.Token, error
 
 	return token, nil
 }
+
 
 func GenerateJWTToken(user models.User) map[string]interface{} {
 	expire := time.Now().Add(time.Minute * time.Duration(JWTExpiresMinutes))

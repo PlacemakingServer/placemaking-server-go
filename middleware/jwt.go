@@ -23,10 +23,10 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		tokenString := strings.Split(authHeader, " ")[1]
-		claims := &jwt.RegisteredClaims{}
+		claims := &jwt.MapClaims{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return SECRET_KEY, nil
+			return []byte(SECRET_KEY), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -36,14 +36,29 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Verifica se o token expirou
-		if claims.ExpiresAt.Time.Before(time.Now()) {
+		exp, ok := (*claims)["exp"].(float64)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Formato do token inválido"})
+			c.Abort()
+			return
+		}
+
+		expirationTime := time.Unix(int64(exp), 0)
+		if expirationTime.Before(time.Now()) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token expirado"})
 			c.Abort()
 			return
 		}
 
 		// Salva o ID do usuário no contexto
-		c.Set("user_id", claims.Subject)
+		if sub, ok := (*claims)["sub"].(string); ok {
+			c.Set("user_id", sub)
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token sem ID de usuário"})
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }
