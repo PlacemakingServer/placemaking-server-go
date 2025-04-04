@@ -3,12 +3,12 @@ package repository
 import (
 	"encoding/json"
 	"log"
-	"placemaking-backend-go/config"
+	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
 )
 
 func GetAllInputTypes() ([]models.InputType, error) {
-	supabase := config.GetSupabase()
+	supabase := db.GetSupabase()
 
 	// Executar a query para buscar todos os input_types
 	response, _, err := supabase.From("input_types").Select("*", "", false).Execute()
