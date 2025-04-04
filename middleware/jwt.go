@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"placemaking-backend-go/config"
+	"placemaking-backend-go/db"
 	"strings"
 	"time"
 
@@ -10,9 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var SECRET_KEY = config.LoadSettings().JwtSecret // Mude para uma chave segura!
-
-// Middleware para validar JWT
+// JWTAuthMiddleware valida o JWT e verifica se o token está ativo
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -26,7 +26,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		claims := &jwt.MapClaims{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(SECRET_KEY), nil
+			return []byte(config.LoadSettings().JwtSecret), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -50,15 +50,42 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Salva o ID do usuário no contexto
+		// Obtém o ID do usuário do token
+		var userID string
 		if sub, ok := (*claims)["sub"].(string); ok {
-			c.Set("user_id", sub)
+			userID = sub
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token sem ID de usuário"})
 			c.Abort()
 			return
 		}
 
+		// Verifica se o token está ativo no Supabase
+		supabase := db.GetSupabase()
+		var tokens []map[string]interface{}
+
+		res, err := supabase.From("tokens").
+			Select("active", "", false).
+			Eq("token", tokenString).
+			ExecuteTo(&tokens)
+
+			log.Println(res)
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Erro ao validar token"})
+			c.Abort()
+			return
+		}
+
+		// Se o token estiver inativo, rejeita a requisição
+		if active, ok := tokens[0]["active"].(bool); !ok || !active {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token revogado"})
+			c.Abort()
+			return
+		}
+
+		// Salva o ID do usuário no contexto
+		c.Set("user_id", userID)
 		c.Next()
 	}
 }
