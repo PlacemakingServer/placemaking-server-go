@@ -75,12 +75,11 @@ func GetAllUsers() ([]models.User, error){
 func DeleteUserById(id string) error {
 	supabase := db.GetSupabase()
 
-	data, _, err := supabase.From("users").
+	_, _, err := supabase.From("users").
 		Delete("", "").
 		Eq("id", id). // Filtra pelo ID do usuário
 		Execute()
 
-	log.Println("Data:", data)
 
 	if err != nil {
 		log.Println("Erro ao deletar usuário:", err)

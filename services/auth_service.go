@@ -82,7 +82,7 @@ func LogoutUser(token string) {
 	}
 }
 
-// SendUserData envia um e-mail ao usuário com seus dados de cadastro.
+// SendUserData envia um e-mail de boas-vindas para o usuário
 func SendUserData(data map[string]interface{}) error {
 	// Obtendo os dados do usuário
 	userData, ok := data["user"].(map[string]interface{})
@@ -90,9 +90,14 @@ func SendUserData(data map[string]interface{}) error {
 		return fmt.Errorf("erro: estrutura de usuário inválida")
 	}
 
-	email, _ := userData["email"].(string)
-	name, _ := userData["name"].(string)
-	tempPassword, _ := data["temporary_password"].(string)
+	email, emailOk := userData["email"].(string)
+	name, nameOk := userData["name"].(string)
+	tempPassword, passOk := data["temporary_password"].(string)
+
+	// Valida se os dados essenciais estão presentes
+	if !emailOk || !nameOk || !passOk {
+		return fmt.Errorf("erro: dados do usuário incompletos")
+	}
 
 	// Caminho do arquivo de template HTML
 	templateFilePath := "./assets/templates/welcome.html"
@@ -103,18 +108,21 @@ func SendUserData(data map[string]interface{}) error {
 		return fmt.Errorf("erro ao ler o template de e-mail: %w", err)
 	}
 
-	// Renderizando o template com os dados do usuário
-	tmpl, err := template.New("email").Parse(string(fileContent))
+	// Criando o template e registrando funções extras
+	tmpl, err := template.New("email").Funcs(template.FuncMap{}).Parse(string(fileContent))
 	if err != nil {
 		return fmt.Errorf("erro ao processar template: %w", err)
 	}
 
 	// Criando o conteúdo do e-mail
-	var renderedEmailContent bytes.Buffer
-	err = tmpl.Execute(&renderedEmailContent, map[string]string{
-		"name":          name,
-		"temp_password": tempPassword,
-	})
+	renderedEmailContent := new(bytes.Buffer)
+	emailData := models.EmailData{
+		Name:         name,
+		TempPassword: tempPassword,
+	}
+
+	// Executando o template com os dados
+	err = tmpl.Execute(renderedEmailContent, emailData)
 	if err != nil {
 		return fmt.Errorf("erro ao renderizar o template: %w", err)
 	}
@@ -124,7 +132,6 @@ func SendUserData(data map[string]interface{}) error {
 	if err != nil {
 		return fmt.Errorf("erro ao enviar e-mail: %w", err)
 	}
-
-	fmt.Println("E-mail enviado para:", email)
+	
 	return nil
 }

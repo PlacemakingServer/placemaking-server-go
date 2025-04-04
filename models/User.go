@@ -6,8 +6,8 @@ import (
 )
 
 type Login struct {
-	Email string `json:"email"`
-	Password string `json"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type User struct {
@@ -22,10 +22,9 @@ type User struct {
 }
 
 type CreateUser struct {
-	ID           string `json:"id"`
 	Name         string `json:"name"`
 	Email        string `json:"email"`
-	ConfirmEmail string `json:"confirm_email"`
+	ConfirmEmail string `json:"confirmation_email"`
 	Role         string `json:"role"`
 	Status       string `json:"status"`
 }
@@ -40,13 +39,13 @@ type InsertUser struct {
 
 // SanitizedUser remove a senha antes de retornar os dados do usuário.
 type SanitizedUser struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
-	Status    string    `json:"status"`
+	Status    string `json:"status"`
 }
 
 // SanitizeUser cria um novo objeto sem a senha.
@@ -61,6 +60,7 @@ func SanitizeUser(user User) SanitizedUser {
 		Status:    user.Status,
 	}
 }
+
 // Método para converter as strings em time.Time
 func (u *User) ConvertTimestamps() {
 	var err error

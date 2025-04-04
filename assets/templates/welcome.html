@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bem-vindo ao Placemaking</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f2f2f2; font-family: Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f2f2f2; padding: 40px 0;">
+      <tr>
+        <td align="center">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <!-- Top Header with Background -->
+            <tr>
+              <td style="background: url('https://placemaking-app-client.vercel.app/img/bg-login.jpg') no-repeat center center; background-size: cover; height: 180px;">
+                <table width="100%" height="100%" style="background-color: rgba(255, 255, 255, 0.4);">
+                  <tr>
+                    <td align="center">
+                      <img src="https://placemaking-app-client.vercel.app/img/logo-no-bg-preto.png" alt="Placemaking Logo" style="width: 180px; height: auto; display: block;" />
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Main Content -->
+            <tr>
+              <td style="padding: 40px 30px 30px 30px; text-align: left;">
+                <h1 style="margin: 0 0 20px; font-size: 24px; color: #333333;">Olá, {{ .Name }} 👋</h1>
+                <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+                  Sua conta foi criada com sucesso no <strong>Placemaking</strong>. Use a senha temporária abaixo para acessar sua conta:
+                </p>
+
+                <p style="font-size: 20px; color: #111111; background-color: #f4f4f4; padding: 12px 20px; border-radius: 6px; text-align: center; font-weight: bold; margin: 20px 0;">
+                  {{ .TempPassword }}
+                </p>
+
+                <p style="font-size: 16px; color: #555555;">
+                  Acesse o app pelo botão abaixo e lembre-se de alterar sua senha assim que possível.
+                </p>
+
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="https://placemaking-app-client.vercel.app/login" style="display: inline-block; padding: 14px 28px; background-color: #111111; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 16px;">Acessar o App</a>
+                </div>
+
+                <p style="font-size: 14px; color: #999999; margin-top: 30px;">Caso tenha qualquer dúvida, entre em contato com nosso suporte.</p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding: 20px 30px; background-color: #fafafa; text-align: center; font-size: 13px; color: #888888;">
+                Atenciosamente,<br />
+                Equipe Placemaking
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
