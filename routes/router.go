@@ -38,6 +38,13 @@ func SetupRouter() *gin.Engine {
 		api.PUT("/users/:id", controllers.UpdateUserById)
 		api.DELETE("/users/:id", controllers.DeleteUserById)
 
+		// Rotas de pesquisas
+		api.POST("/researches", controllers.CreateResearch)
+		api.GET("/researches", controllers.GetAllResearches)
+		api.GET("/researches/:id", controllers.GetResearchById)
+		api.PUT("/researches/:id", controllers.UpdateResearch)
+		api.DELETE("/researches/:id", controllers.DeleteResearch)
+
 		// Rotas de tipos de input
 		api.GET("/input_types", controllers.GetInputTypes)
 	}
