@@ -12,13 +12,15 @@ func SetupRouter() *gin.Engine {
 
 	router.POST("/auth/login", controllers.Login)
 	router.POST("/auth/register", controllers.Register)
+	router.POST("/auth/forgot_password", controllers.ForgotPassword)
+	router.POST("/auth/validate_code", controllers.ValidateCode)
 
-	api := router.Group("/api")
+	api := router.Group("/api/v1")
 	api.Use(middleware.JWTAuthMiddleware())
 	{
 		//Rotas para Auth
-
 		api.POST("/logout", controllers.Logout)
+		api.PUT("/auth/reset_password", controllers.ResetPassword)
 
 
 		//Rotas para Users

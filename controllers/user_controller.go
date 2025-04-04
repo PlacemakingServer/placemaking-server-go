@@ -18,7 +18,7 @@ func GetUserById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Usuário encontrado.","user": user})
+	c.JSON(http.StatusOK, gin.H{"message": "Usuário encontrado.","user": models.SanitizeUser(user)})
 }
 
 func GetAllUsers(c *gin.Context) {

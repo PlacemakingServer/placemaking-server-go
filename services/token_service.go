@@ -2,13 +2,15 @@ package services
 
 import (
 	"errors"
-	"log"
-	"time"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
+	"log"
+	"math/rand"
 	"placemaking-backend-go/config"
 	"placemaking-backend-go/models"
 	repository "placemaking-backend-go/repositories"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const JWTAlgorithm = "HS256"
@@ -20,7 +22,7 @@ func GenerateUserToken(user models.User, tokenType string) (*models.Token, error
 		existingToken, err := repository.GetTokenByUserID(user.ID, tokenType)
 		if err == nil && existingToken != nil && existingToken.Active {
 			// Converter string Expires_at para time.Time
-			layout := time.RFC3339
+			layout := "2006-01-02T15:04:05"
 			expiresAt, err := time.Parse(layout, existingToken.Expires_at)
 			if err != nil {
 				log.Println("[GenerateUserToken] Erro ao converter Expires_at:", err)
@@ -130,22 +132,11 @@ func RevokeToken(token string) error {
 }
 
 func generateRandomToken(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	rand.Seed(time.Now().UnixNano()) // Garante números aleatórios diferentes a cada execução
+	const digits = "0123456789"
 	token := make([]byte, length)
 	for i := range token {
-		token[i] = charset[randomInt(0, len(charset))]
+		token[i] = digits[rand.Intn(len(digits))]
 	}
 	return string(token)
-}
-
-func randomInt(min, max int) int {
-	return min + (max-min)*randomSeed()/randomSeedMax()
-}
-
-func randomSeed() int {
-	return int(time.Now().UnixNano() % 10000)
-}
-
-func randomSeedMax() int {
-	return 10000
 }

@@ -130,3 +130,19 @@ func InsertUser(createUserData models.InsertUser) (*models.User, error) {
 
 	return &user, nil
 }
+
+
+func UpdateUserPassword(userID string, password string) error {
+	supabase := db.GetSupabase()
+
+	_, _, err := supabase.From("users").
+		Update(map[string]interface{}{"password": password}, "", "").
+		Eq("id", userID).
+		Execute()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

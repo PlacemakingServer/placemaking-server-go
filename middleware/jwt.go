@@ -64,12 +64,10 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		supabase := db.GetSupabase()
 		var tokens []map[string]interface{}
 
-		res, err := supabase.From("tokens").
+		_, err = supabase.From("tokens").
 			Select("active", "", false).
 			Eq("token", tokenString).
 			ExecuteTo(&tokens)
-
-			log.Println(res)
 
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Erro ao validar token"})
@@ -78,7 +76,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Se o token estiver inativo, rejeita a requisição
-		if active, ok := tokens[0]["active"].(bool); !ok || !active {
+		if len(tokens) == 0 || tokens[0]["active"] == nil || tokens[0]["active"].(bool) == false {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token revogado"})
 			c.Abort()
 			return
@@ -86,6 +84,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 
 		// Salva o ID do usuário no contexto
 		c.Set("user_id", userID)
+		log.Println("✅ user_id salvo no contexto:", userID)
 		c.Next()
 	}
 }
