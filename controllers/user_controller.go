@@ -60,5 +60,5 @@ func UpdateUserById(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar usuário"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Usuário atualizado com sucesso", "user": updatedUser})
+	c.JSON(http.StatusOK, gin.H{"message": "Usuário atualizado com sucesso", "user": models.SanitizeUser(updatedUser)})
 }

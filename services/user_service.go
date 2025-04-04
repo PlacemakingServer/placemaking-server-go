@@ -18,10 +18,10 @@ func FetchUserById(id string) (models.User, error) {
 	return user, nil
 }
 
-func FetchAllUsers() ([]models.User, error) {
+func FetchAllUsers() ([]models.SanitizedUser, error) {
 	users, err := repository.GetAllUsers()
 	if err != nil {
-		return []models.User{}, err
+		return []models.SanitizedUser{}, err
 	}
 
 	return users, nil
@@ -40,9 +40,8 @@ func FetchUpdateUser(id string, user models.User) (models.User, error) {
 	updatedData := map[string]interface{}{
 		"name":       user.Name,
 		"email":      user.Email,
-		"created_at": user.Created_at,
 		"role":       user.Role,
-		"updated_at": time.Now(),
+		"updated_at": time.Now().Format(time.RFC3339),
 		"status":     user.Status,
 	}
 
