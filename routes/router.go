@@ -10,21 +10,65 @@ import (
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 
-	router.POST("/auth/login", controllers.Login)
-	router.POST("/auth/register", controllers.Register)
+	// Lista de rotas públicas dentro de /api/v1
+	publicRoutes := map[string]bool{
+		"POST /api/v1/auth/login":           true,
+		"POST /api/v1/auth/register":        true,
+		"POST /api/v1/auth/forgot_password": true,
+		"POST /api/v1/auth/validate_code":   true,
+	}
 
-	api := router.Group("/api")
-	api.Use(middleware.JWTAuthMiddleware())
+	// Todas as rotas dentro de /api/v1 passam pelo middleware
+	api := router.Group("/api/v1")
+	api.Use(middleware.JWTAuthMiddleware(publicRoutes))
 	{
-		//Rotas para Auth
-		api.POST("/logout", controllers.Logout)
-		//Rotas para Users
-		api.GET("/users/:id", controllers.GetUserById)
-		api.GET("/users", controllers.GetAllUsers)
-		api.PUT("/users/:id", controllers.UpdateUserById)
-		api.DELETE("/users/:id", controllers.DeleteUserById)
+		// Grupo de autenticação
+		auth := api.Group("/auth")
+		{
+			auth.POST("/login", controllers.Login)
+			auth.POST("/register", controllers.Register)
+			auth.POST("/forgot_password", controllers.ForgotPassword)
+			auth.POST("/validate_code", controllers.ValidateCode)
+			auth.POST("/logout", controllers.Logout)
+			auth.PUT("/reset_password", controllers.ResetPassword)
+		}
 
-		//Rotas para Input_Types
+		// Grupo de usuários
+		users := api.Group("/users")
+		{
+			users.GET("/:id", controllers.GetUserById)
+			users.GET("", controllers.GetAllUsers)
+			users.PUT("/:id", controllers.UpdateUserById)
+			users.DELETE("/:id", controllers.DeleteUserById)
+		}
+
+		// Grupo de pesquisas
+		researches := api.Group("/researches")
+		{
+			researches.POST("", controllers.CreateResearch)
+			researches.GET("", controllers.GetAllResearches)
+			researches.GET("/:researchId", controllers.GetResearchById)
+			researches.PUT("/:researchId", controllers.UpdateResearch)
+			researches.DELETE("/:researchId", controllers.DeleteResearch)
+
+			// Grupo de colaboradores dentro de uma pesquisa (evitando conflito com :id)
+			contributors := researches.Group("/:researchId/contributors")
+			{
+				contributors.POST("", controllers.CreateContributor)
+				contributors.GET("", controllers.GetAllContributorsByResearchId)
+				contributors.GET("/:userId", controllers.GetContributorByResearchAndUserId)
+				contributors.DELETE("/:userId", controllers.DeleteContributorByResearchAndUserId)
+			}
+		}
+
+		contributor := api.Group("/contributors")
+		{
+			contributor.GET("/:id", controllers.GetContributorById)
+			contributor.PUT("/:id", controllers.UpdateContributorById)
+			contributor.DELETE("/:id", controllers.DeleteContributorById)
+		}
+
+		// Grupo de tipos de input
 		api.GET("/input_types", controllers.GetInputTypes)
 	}
 

@@ -50,7 +50,7 @@ func GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-func GetAllUsers() ([]models.User, error){
+func GetAllUsers() ([]models.SanitizedUser, error){
 	supabase := db.GetSupabase()
 
 	var users []models.User
@@ -64,12 +64,13 @@ func GetAllUsers() ([]models.User, error){
 		return nil, err
 	}
 
-	for i := range users {
-		users[i].ConvertTimestamps()
+	var sanitizedUsers []models.SanitizedUser
+	for _, user := range users {
+		user.ConvertTimestamps()
+		sanitizedUsers = append(sanitizedUsers, models.SanitizeUser(user))
 	}
 
-	return users, nil
-
+	return sanitizedUsers, nil
 }
 
 func DeleteUserById(id string) error {
@@ -129,4 +130,20 @@ func InsertUser(createUserData models.InsertUser) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+
+func UpdateUserPassword(userID string, password string) error {
+	supabase := db.GetSupabase()
+
+	_, _, err := supabase.From("users").
+		Update(map[string]interface{}{"password": password}, "", "").
+		Eq("id", userID).
+		Execute()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

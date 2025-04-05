@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
-
 	"github.com/jordan-wright/email"
 	"placemaking-backend-go/config"
 )

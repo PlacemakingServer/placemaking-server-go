@@ -2,6 +2,7 @@ package services
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -52,19 +53,19 @@ func LoginUser(email string, password string) (map[string]interface{}, error) {
 	// Busca o usuário pelo email
 	existingUser, err := repository.GetUserByEmail(email)
 	if err != nil {
-		return map[string]interface{}{"error": "Usuário não encontrado"}, nil
+		return map[string]interface{}{"error": "Usuário não encontrado"}, err
 	}
 
 	// Verifica a senha
 	if !CheckPassword(password, existingUser.Password) {
-		return map[string]interface{}{"error": "Senha inválida"}, nil
+		return map[string]interface{}{"error": "Senha inválida"}, err
 	}
 
 	// Gera um token JWT para o usuário autenticado
 	token, err := GenerateUserToken(existingUser, "Bearer")
 	if err != nil {
 		log.Println("Erro ao gerar token:", err)
-		return map[string]interface{}{"error": "Erro ao gerar token"}, nil
+		return map[string]interface{}{"error": "Erro ao gerar token"}, err
 	}
 
 	// Retorna os dados sanitizados do usuário e o token
@@ -78,7 +79,7 @@ func LogoutUser(token string) {
 	err := RevokeToken(token)
 	if err != nil {
 		log.Println("error: erro ao fazer logout:", err)
-	return
+		return
 	}
 }
 
@@ -132,6 +133,149 @@ func SendUserData(data map[string]interface{}) error {
 	if err != nil {
 		return fmt.Errorf("erro ao enviar e-mail: %w", err)
 	}
-	
+
 	return nil
+}
+
+func SendForgotEmailPasswordData(data map[string]interface{}) error {
+	fmt.Println("Iniciando envio de e-mail de recuperação...")
+
+	userStruct, ok := data["user"].(models.User)
+	if !ok {
+		return fmt.Errorf("erro: estrutura de usuário inválida")
+	}
+
+	// Serializa a struct para JSON
+	userJSON, err := json.Marshal(userStruct)
+	if err != nil {
+		return fmt.Errorf("erro ao serializar usuário: %w", err)
+	}
+
+	// Converte o JSON para um map[string]interface{}
+	var userData map[string]interface{}
+	err = json.Unmarshal(userJSON, &userData)
+	if err != nil {
+		return fmt.Errorf("erro ao desserializar usuário: %w", err)
+	}
+	
+	email, emailOk := userData["email"].(string)
+	name, nameOk := userData["name"].(string)
+	token, tokenOk := data["token"].(string)
+
+	// Valida se os dados essenciais estão presentes
+	if !emailOk || !nameOk || !tokenOk {
+		fmt.Println("Erro: dados do usuário incompletos")
+		return fmt.Errorf("erro: dados do usuário incompletos")
+	}
+
+	fmt.Printf("Enviando e-mail para %s (%s), token: %s\n", name, email, token)
+
+	// Caminho do arquivo de template HTML
+	templateFilePath := "./assets/templates/recovery-password.html"
+
+	// Lendo o arquivo do template
+	fileContent, err := os.ReadFile(templateFilePath)
+	if err != nil {
+		fmt.Println("Erro ao ler template:", err)
+		return fmt.Errorf("erro ao ler o template de e-mail: %w", err)
+	}
+
+	// Criando o template e registrando funções extras
+	tmpl, err := template.New("email").Funcs(template.FuncMap{}).Parse(string(fileContent))
+	if err != nil {
+		fmt.Println("Erro ao processar template:", err)
+		return fmt.Errorf("erro ao processar template: %w", err)
+	}
+
+	// Criando o conteúdo do e-mail
+	renderedEmailContent := new(bytes.Buffer)
+	emailData := models.RecoveryEmailData{
+		Name:  name,
+		Token: token,
+	}
+
+	// Executando o template com os dados
+	err = tmpl.Execute(renderedEmailContent, emailData)
+	if err != nil {
+		fmt.Println("Erro ao renderizar template:", err)
+		return fmt.Errorf("erro ao renderizar o template: %w", err)
+	}
+
+	fmt.Println("Conteúdo do e-mail gerado com sucesso!")
+
+	// Enviar o e-mail
+	err = SendEmail(email, renderedEmailContent.String(), "Recuperação de Senha")
+	if err != nil {
+		fmt.Println("Erro ao enviar e-mail:", err)
+		return fmt.Errorf("erro ao enviar e-mail: %w", err)
+	}
+
+	fmt.Println("E-mail enviado com sucesso!")
+	return nil
+}
+
+func ForgotPasswordService(email string) (map[string]interface{}, error) {
+
+	user, err := repository.GetUserByEmail(email)
+
+	if err != nil {
+		return map[string]interface{}{"error": "Usuário não encontrado"}, nil
+	}
+
+	token, err := GenerateUserToken(user, "RecoverPassword")
+
+	if err != nil {
+		return map[string]interface{}{"error": "Erro ao gerar token"}, nil
+	}
+
+	return map[string]interface{}{"error": nil, "token": token.Token, "user": user}, nil
+}
+
+func ValidateCodeService(token string) (map[string]interface{}, error) {
+	tokenToValidate, err := repository.GetToken(token)
+
+	if err != nil {
+		return map[string]interface{}{"error": "Código inválido ou não encontrado."}, err
+	}
+
+	if tokenToValidate.Token != token {
+		return map[string]interface{}{"error": "Código inválido."}, nil
+	}
+
+	user, err := repository.GetUserById(tokenToValidate.User_id)
+
+	if err != nil {
+		return map[string]interface{}{"error": "Erro ao buscar usuário no banco de dados."}, err
+	}
+
+	accessToken, err := GenerateUserToken(user, "Bearer")
+
+	if err != nil {
+		return map[string]interface{}{"error": "Erro ao gerar token de usuário"}, err
+	}
+
+	return map[string]interface{}{
+		"error": nil, 
+		"access_token": models.SanitizeToken(*accessToken), 
+		"validated_token": tokenToValidate.Token, 
+		"user": user}, nil
+}
+
+func ResetPasswordService(newPassword, confirmPassword, userID string) (map[string]interface{}, error) {
+
+	if newPassword != confirmPassword {
+		return map[string]interface{}{"error": "Senhas não conferem"}, nil
+	}
+
+	hashedPassword, err := GenerateHashedPassword(newPassword)
+	if err != nil {
+		return map[string]interface{}{"error": "Erro ao criptografar a nova senha."}, err
+	}
+
+	err = repository.UpdateUserPassword(userID, hashedPassword)
+	if err != nil {
+		return map[string]interface{}{"error": "Erro ao atualizar senha no banco."}, err
+	}
+
+	return map[string]interface{}{"message": "Senha redefinida com sucesso!"}, nil
 }

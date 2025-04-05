@@ -1,10 +1,9 @@
 package middleware
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"placemaking-backend-go/config"
-	"placemaking-backend-go/db"
 	"strings"
 	"time"
 
@@ -13,8 +12,19 @@ import (
 )
 
 // JWTAuthMiddleware valida o JWT e verifica se o token está ativo
-func JWTAuthMiddleware() gin.HandlerFunc {
+func JWTAuthMiddleware(publicRoutes map[string]bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		method := c.Request.Method
+		path := c.FullPath()
+		routeKey := fmt.Sprintf("%s %s", method, path)
+
+		// Se a rota for pública, permite a requisição sem autenticação
+		if publicRoutes[routeKey] {
+			c.Next()
+			return
+		}
+
+		// Caso contrário, exige autenticação
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token não fornecido"})
@@ -56,30 +66,6 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			userID = sub
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token sem ID de usuário"})
-			c.Abort()
-			return
-		}
-
-		// Verifica se o token está ativo no Supabase
-		supabase := db.GetSupabase()
-		var tokens []map[string]interface{}
-
-		res, err := supabase.From("tokens").
-			Select("active", "", false).
-			Eq("token", tokenString).
-			ExecuteTo(&tokens)
-
-			log.Println(res)
-
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Erro ao validar token"})
-			c.Abort()
-			return
-		}
-
-		// Se o token estiver inativo, rejeita a requisição
-		if active, ok := tokens[0]["active"].(bool); !ok || !active {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token revogado"})
 			c.Abort()
 			return
 		}
