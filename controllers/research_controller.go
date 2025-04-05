@@ -23,7 +23,7 @@ func CreateResearch(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, research)
+c.JSON(http.StatusCreated, gin.H{"message": "Pesquisa criada com sucesso!", "research": research})
 }
 
 // Buscar todas as pesquisas
@@ -34,12 +34,12 @@ func GetAllResearches(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, researches)
+	c.JSON(http.StatusOK, gin.H{"message": "Lista de pesquisas encontradas.", "researches": researches})
 }
 
 // Buscar pesquisa por ID
 func GetResearchById(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("researchId")
 
 	research, err := services.FetchResearchById(id)
 	if err != nil {
@@ -47,12 +47,12 @@ func GetResearchById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, research)
+	c.JSON(http.StatusOK, gin.H{"message": "Pesquisa encontrada com sucesso.", "research": research})
 }
 
 // Atualizar pesquisa por ID
 func UpdateResearch(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("researchId")
 	var updateResearchData models.UpdateResearch
 
 	if err := c.ShouldBindJSON(&updateResearchData); err != nil {
@@ -66,18 +66,24 @@ func UpdateResearch(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, research)
+	c.JSON(http.StatusOK, gin.H{"message": "Pesquisa atualizada com sucesso.", "research": research})
 }
 
 // Deletar pesquisa por ID
 func DeleteResearch(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Param("researchId")
 
-	err := services.FetchDeleteResearch(id)
+	errChan := make(chan error, 1)
+
+	go func() {
+		errChan <- services.FetchDeleteResearch(id)
+	}()
+
+	err := <-errChan
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar pesquisa"})
 		return
 	}
 
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusOK, gin.H{"message": "Pesquisa apagada com sucesso."})
 }

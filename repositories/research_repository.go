@@ -85,7 +85,7 @@ func UpdateResearchById(id string, updateResearchData models.UpdateResearch) (mo
 
 	var research models.Research
 
-	_, err := supabase.From("researches").
+	_, err := supabase.From("research").
 		Update(updatedData, "", ""). // Atualiza os dados no Supabase
 		Eq("id", id).                // Filtra pelo ID
 		Single().
@@ -102,7 +102,7 @@ func UpdateResearchById(id string, updateResearchData models.UpdateResearch) (mo
 func DeleteResearchById(id string) error {
 	supabase := db.GetSupabase()
 
-	_, _, err := supabase.From("researches").
+	_, _, err := supabase.From("research").
 		Delete("","").
 		Eq("id", id).
 		Execute()

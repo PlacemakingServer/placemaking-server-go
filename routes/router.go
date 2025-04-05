@@ -22,30 +22,53 @@ func SetupRouter() *gin.Engine {
 	api := router.Group("/api/v1")
 	api.Use(middleware.JWTAuthMiddleware(publicRoutes))
 	{
-		// Rotas de autenticação
-		api.POST("/auth/login", controllers.Login)
-		api.POST("/auth/register", controllers.Register)
-		api.POST("/auth/forgot_password", controllers.ForgotPassword)
-		api.POST("/auth/validate_code", controllers.ValidateCode)
+		// Grupo de autenticação
+		auth := api.Group("/auth")
+		{
+			auth.POST("/login", controllers.Login)
+			auth.POST("/register", controllers.Register)
+			auth.POST("/forgot_password", controllers.ForgotPassword)
+			auth.POST("/validate_code", controllers.ValidateCode)
+			auth.POST("/logout", controllers.Logout)
+			auth.PUT("/reset_password", controllers.ResetPassword)
+		}
 
-		// Rotas protegidas
-		api.POST("/auth/logout", controllers.Logout)
-		api.PUT("/auth/reset_password", controllers.ResetPassword)
+		// Grupo de usuários
+		users := api.Group("/users")
+		{
+			users.GET("/:id", controllers.GetUserById)
+			users.GET("", controllers.GetAllUsers)
+			users.PUT("/:id", controllers.UpdateUserById)
+			users.DELETE("/:id", controllers.DeleteUserById)
+		}
 
-		// Rotas de usuários
-		api.GET("/users/:id", controllers.GetUserById)
-		api.GET("/users", controllers.GetAllUsers)
-		api.PUT("/users/:id", controllers.UpdateUserById)
-		api.DELETE("/users/:id", controllers.DeleteUserById)
+		// Grupo de pesquisas
+		researches := api.Group("/researches")
+		{
+			researches.POST("", controllers.CreateResearch)
+			researches.GET("", controllers.GetAllResearches)
+			researches.GET("/:researchId", controllers.GetResearchById)
+			researches.PUT("/:researchId", controllers.UpdateResearch)
+			researches.DELETE("/:researchId", controllers.DeleteResearch)
 
-		// Rotas de pesquisas
-		api.POST("/researches", controllers.CreateResearch)
-		api.GET("/researches", controllers.GetAllResearches)
-		api.GET("/researches/:id", controllers.GetResearchById)
-		api.PUT("/researches/:id", controllers.UpdateResearch)
-		api.DELETE("/researches/:id", controllers.DeleteResearch)
+			// Grupo de colaboradores dentro de uma pesquisa (evitando conflito com :id)
+			contributors := researches.Group("/:researchId/contributors")
+			{
+				contributors.POST("", controllers.CreateContributor)
+				contributors.GET("", controllers.GetAllContributorsByResearchId)
+				contributors.GET("/:userId", controllers.GetContributorByResearchAndUserId)
+				contributors.DELETE("/:userId", controllers.DeleteContributorByResearchAndUserId)
+			}
+		}
 
-		// Rotas de tipos de input
+		contributor := api.Group("/contributors")
+		{
+			contributor.GET("/:id", controllers.GetContributorById)
+			contributor.PUT("/:id", controllers.UpdateContributorById)
+			contributor.DELETE("/:id", controllers.DeleteContributorById)
+		}
+
+		// Grupo de tipos de input
 		api.GET("/input_types", controllers.GetInputTypes)
 	}
 

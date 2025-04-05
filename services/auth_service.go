@@ -53,19 +53,19 @@ func LoginUser(email string, password string) (map[string]interface{}, error) {
 	// Busca o usuário pelo email
 	existingUser, err := repository.GetUserByEmail(email)
 	if err != nil {
-		return map[string]interface{}{"error": "Usuário não encontrado"}, nil
+		return map[string]interface{}{"error": "Usuário não encontrado"}, err
 	}
 
 	// Verifica a senha
 	if !CheckPassword(password, existingUser.Password) {
-		return map[string]interface{}{"error": "Senha inválida"}, nil
+		return map[string]interface{}{"error": "Senha inválida"}, err
 	}
 
 	// Gera um token JWT para o usuário autenticado
 	token, err := GenerateUserToken(existingUser, "Bearer")
 	if err != nil {
 		log.Println("Erro ao gerar token:", err)
-		return map[string]interface{}{"error": "Erro ao gerar token"}, nil
+		return map[string]interface{}{"error": "Erro ao gerar token"}, err
 	}
 
 	// Retorna os dados sanitizados do usuário e o token
