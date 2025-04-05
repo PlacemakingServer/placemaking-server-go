@@ -17,10 +17,7 @@ func SetupRouter() *gin.Engine {
 	api.Use(middleware.JWTAuthMiddleware())
 	{
 		//Rotas para Auth
-
 		api.POST("/logout", controllers.Logout)
-
-
 		//Rotas para Users
 		api.GET("/users/:id", controllers.GetUserById)
 		api.GET("/users", controllers.GetAllUsers)
