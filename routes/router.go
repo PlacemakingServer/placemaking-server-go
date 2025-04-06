@@ -43,7 +43,7 @@ func SetupRouter() *gin.Engine {
 		}
 
 		// Grupo de pesquisas
-		researches := api.Group("/researches")
+		researches := api.Group("/research")
 		{
 			researches.POST("", controllers.CreateResearch)
 			researches.GET("", controllers.GetAllResearches)
@@ -61,10 +61,10 @@ func SetupRouter() *gin.Engine {
 			}
 
 			// Grupo de surveys dentro de uma pesquisa
-			surveys := researches.Group("/:researchId/surveys")
+			surveys := researches.Group("/:researchId/survey")
 			{
 				surveys.GET("", controllers.GetSurveysByResearchId)
-				surveys.GET("/:surveyId", controllers.GetSurveyById)
+				surveys.GET("/:surveyId", controllers.GetSurveyById) //survey**
 				surveys.DELETE("/:surveyId", controllers.DeleteSurveyById)
 			}
 		}
@@ -78,10 +78,18 @@ func SetupRouter() *gin.Engine {
 		}
 
 		//Rotas para surveys
-		survey := api.Group("/surveys")
+		survey := api.Group("/survey")
 		{
 			survey.POST("", controllers.CreateSurvey)
 			survey.PUT("/:surveyId", controllers.UpdateSurveyById)
+
+			fields := survey.Group("/:surveyId/fields")
+				{
+					fields.POST("", controllers.CreateField)
+					fields.GET("", controllers.GetAllFieldsBySurveyId)
+					fields.PUT("/:fieldId", controllers.UpdateField)
+					fields.DELETE("/:fieldId", controllers.DeleteField)
+				}
 
 		}
 
