@@ -59,13 +59,30 @@ func SetupRouter() *gin.Engine {
 				contributors.GET("/:userId", controllers.GetContributorByResearchAndUserId)
 				contributors.DELETE("/:userId", controllers.DeleteContributorByResearchAndUserId)
 			}
+
+			// Grupo de surveys dentro de uma pesquisa
+			surveys := researches.Group("/:researchId/surveys")
+			{
+				surveys.GET("", controllers.GetSurveysByResearchId)
+				surveys.GET("/:surveyId", controllers.GetSurveyById)
+				surveys.DELETE("/:surveyId", controllers.DeleteSurveyById)
+			}
 		}
 
+		//Rotas para Contributors
 		contributor := api.Group("/contributors")
 		{
 			contributor.GET("/:id", controllers.GetContributorById)
 			contributor.PUT("/:id", controllers.UpdateContributorById)
 			contributor.DELETE("/:id", controllers.DeleteContributorById)
+		}
+
+		//Rotas para surveys
+		survey := api.Group("/surveys")
+		{
+			survey.POST("", controllers.CreateSurvey)
+			survey.PUT("/:surveyId", controllers.UpdateSurveyById)
+
 		}
 
 		// Grupo de tipos de input
