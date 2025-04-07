@@ -2,11 +2,18 @@ package repository
 
 import (
 	"log"
+	"fmt"
 	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
 )
 
-func CreateSurvey(surveyType string, createSurveyData models.CreateSurvey) (models.Survey, error) {
+var surveyTypeMap = map[string]string{
+	"Formulário": "form_surveys",
+	"Estática":   "static_surveys",
+	"Dinâmica":   "dynamic_surveys",
+}
+
+func CreateSurvey(createSurveyData models.CreateSurvey) (models.Survey, error) {
 	supabase := db.GetSupabase()
 
 	// Criando um mapa para representar os dados da pesquisa
@@ -21,9 +28,17 @@ func CreateSurvey(surveyType string, createSurveyData models.CreateSurvey) (mode
 
 	var survey models.Survey
 
+	tableName, exists := surveyTypeMap[createSurveyData.SurveyType]
+	if !exists {
+		err := fmt.Errorf("tipo de survey inválido: %s", createSurveyData.SurveyType)
+		log.Println("[CreateSurvey] Erro:", err)
+		return models.Survey{}, err
+	}
+	
 	// Inserindo no banco de dados
-	_, err := supabase.From(surveyType).
+	_, err := supabase.From(tableName).
 		Insert(newSurvey, false, "", "", "").
+		Single().
 		ExecuteTo(&survey)
 
 	if err != nil {
@@ -39,7 +54,14 @@ func GetAllSurveys(surveyType string) ([]models.Survey, error) {
 
 	var surveys []models.Survey
 
-	_, err := supabase.From(surveyType).
+	tableName, exists := surveyTypeMap[surveyType]
+	if !exists {
+		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
+		log.Println("[CreateSurvey] Erro:", err)
+		return []models.Survey{}, err
+	}
+
+	_, err := supabase.From(tableName).
 		Select("*", "", false).
 		ExecuteTo(&surveys)
 
@@ -51,14 +73,23 @@ func GetAllSurveys(surveyType string) ([]models.Survey, error) {
 	return surveys, nil
 }
 
-func GetSurveyById(id, surveyType string) (models.Survey, error) {
+func GetSurveyById(id, researchId, surveyType string) (models.Survey, error) {
 	supabase := db.GetSupabase()
+
+	tableName, exists := surveyTypeMap[surveyType]
+	if !exists {
+		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
+		log.Println("[CreateSurvey] Erro:", err)
+		return models.Survey{}, err
+	}
+	
 
 	var survey models.Survey
 
-	_, err := supabase.From(surveyType).
+	_, err := supabase.From(tableName).
 		Select("*", "", false).
 		Eq("id", id).
+		Eq("research_id", researchId).
 		Single().
 		ExecuteTo(&survey)
 
@@ -70,8 +101,15 @@ func GetSurveyById(id, surveyType string) (models.Survey, error) {
 	return survey, nil
 }
 
-func UpdateSurveyById(id, surveyType string, updateData models.UpdateResearch) (models.Survey, error) {
+func UpdateSurveyById(id, surveyType string, updateData models.UpdateSurvey) (models.Survey, error) {
 	supabase := db.GetSupabase()
+
+	tableName, exists := surveyTypeMap[surveyType]
+	if !exists {
+		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
+		log.Println("[CreateSurvey] Erro:", err)
+		return models.Survey{}, err
+	}
 
 	// Criando um mapa com os dados atualizados
 	updatedFields := map[string]interface{}{
@@ -84,7 +122,7 @@ func UpdateSurveyById(id, surveyType string, updateData models.UpdateResearch) (
 
 	var survey models.Survey
 
-	_, err := supabase.From(surveyType).
+	_, err := supabase.From(tableName).
 		Update(updatedFields, "", "").
 		Eq("id", id).
 		Single().
@@ -101,9 +139,17 @@ func UpdateSurveyById(id, surveyType string, updateData models.UpdateResearch) (
 func DeleteSurveyById(id, surveyType string) (models.Survey, error) {
 	supabase := db.GetSupabase()
 
+	tableName, exists := surveyTypeMap[surveyType]
+	if !exists {
+		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
+		log.Println("[CreateSurvey] Erro:", err)
+		return models.Survey{}, err
+	}
+
+
 	var survey models.Survey
 
-	_, _, err := supabase.From(surveyType).
+	_, _, err := supabase.From(tableName).
 		Delete("","").
 		Eq("id", id).
 		Single().
@@ -121,9 +167,16 @@ func DeleteSurveyById(id, surveyType string) (models.Survey, error) {
 func GetSurveysByResearchId(researchId, surveyType string) ([]models.Survey, error) {
 	supabase := db.GetSupabase()
 
+	tableName, exists := surveyTypeMap[surveyType]
+	if !exists {
+		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
+		log.Println("[CreateSurvey] Erro:", err)
+		return []models.Survey{}, err
+	}
+
 	var surveys []models.Survey
 
-	_, err := supabase.From(surveyType).
+	_, err := supabase.From(tableName).
 		Select("*", "", false).
 		Eq("research_id", researchId).
 		ExecuteTo(&surveys)

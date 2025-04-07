@@ -7,12 +7,12 @@ import (
 )
 
 // Criar uma nova pesquisa
-func CreateSurvey(surveyType string, createSurveyData models.CreateSurvey) (models.Survey, error) {
+func CreateSurvey(createSurveyData models.CreateSurvey) (models.Survey, error) {
 	if createSurveyData.Title == "" || createSurveyData.ResearchId == "" {
 		return models.Survey{}, errors.New("título e ID da pesquisa são obrigatórios")
 	}
 
-	return repository.CreateSurvey(surveyType, createSurveyData)
+	return repository.CreateSurvey(createSurveyData)
 }
 
 // Obter todas as pesquisas
@@ -25,16 +25,16 @@ func GetAllSurveys(surveyType string) ([]models.Survey, error) {
 }
 
 // Obter uma pesquisa por ID
-func GetSurveyById(id, surveyType string) (models.Survey, error) {
+func GetSurveyById(id, researchId, surveyType string) (models.Survey, error) {
 	if id == "" {
 		return models.Survey{}, errors.New("o ID da pesquisa é obrigatório")
 	}
 
-	return repository.GetSurveyById(id, surveyType)
+	return repository.GetSurveyById(id, researchId, surveyType)
 }
 
 // Atualizar uma pesquisa por ID
-func UpdateSurveyById(id, surveyType string, updateData models.UpdateResearch) (models.Survey, error) {
+func UpdateSurveyById(id, surveyType string, updateData models.UpdateSurvey) (models.Survey, error) {
 	if id == "" {
 		return models.Survey{}, errors.New("o ID da pesquisa é obrigatório")
 	}

@@ -11,7 +11,6 @@ import (
 // Criar uma nova pesquisa
 func CreateSurvey(c *gin.Context) {
 	var createSurveyData models.CreateSurvey
-	surveyType := c.Param("survey_type")
 
 	if err := c.ShouldBindJSON(&createSurveyData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -21,7 +20,7 @@ func CreateSurvey(c *gin.Context) {
 		return
 	}
 
-	survey, err := services.CreateSurvey(surveyType, createSurveyData)
+	survey, err := services.CreateSurvey(createSurveyData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Erro ao criar a pesquisa.",
@@ -36,31 +35,23 @@ func CreateSurvey(c *gin.Context) {
 	})
 }
 
-// Obter todas as pesquisas
-func GetAllSurveys(c *gin.Context) {
-	surveyType := c.Param("survey_type")
+// Obter uma pesquisa por ID
+func GetSurveyById(c *gin.Context) {
+	id := c.Param("surveyId")
+	researchId := c.Param("researchId")
+	
+	var surveyType models.SurveyType
 
-	surveys, err := services.GetAllSurveys(surveyType)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Erro ao buscar pesquisas.",
+	if err := c.ShouldBindJSON(&surveyType); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Erro ao processar os dados. Verifique as informações enviadas.",
 			"error":   err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Pesquisas recuperadas com sucesso.",
-		"surveys": surveys,
-	})
-}
 
-// Obter uma pesquisa por ID
-func GetSurveyById(c *gin.Context) {
-	id := c.Param("id")
-	surveyType := c.Param("survey_type")
-
-	survey, err := services.GetSurveyById(id, surveyType)
+	survey, err := services.GetSurveyById(id, researchId, surveyType.Type)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Pesquisa não encontrada.",
@@ -77,10 +68,10 @@ func GetSurveyById(c *gin.Context) {
 
 // Atualizar uma pesquisa por ID
 func UpdateSurveyById(c *gin.Context) {
-	id := c.Param("id")
-	surveyType := c.Param("survey_type")
+	id := c.Param("surveyId")
+	
 
-	var updateData models.UpdateResearch
+	var updateData models.UpdateSurvey
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Erro ao processar os dados. Verifique as informações enviadas.",
@@ -89,7 +80,7 @@ func UpdateSurveyById(c *gin.Context) {
 		return
 	}
 
-	survey, err := services.UpdateSurveyById(id, surveyType, updateData)
+	survey, err := services.UpdateSurveyById(id, updateData.SurveyType, updateData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Erro ao atualizar a pesquisa.",
@@ -106,10 +97,19 @@ func UpdateSurveyById(c *gin.Context) {
 
 // Deletar uma pesquisa por ID
 func DeleteSurveyById(c *gin.Context) {
-	id := c.Param("id")
-	surveyType := c.Param("survey_type")
+	id := c.Param("surveyId")
+	
+		var surveyType models.SurveyType
 
-	survey, err := services.DeleteSurveyById(id, surveyType)
+	if err := c.ShouldBindJSON(&surveyType); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Erro ao processar os dados. Verifique as informações enviadas.",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	_, err := services.DeleteSurveyById(id, surveyType.Type)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Erro ao deletar a pesquisa.",
@@ -120,16 +120,24 @@ func DeleteSurveyById(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":        "Pesquisa deletada com sucesso.",
-		"deleted_survey": survey,
 	})
 }
 
 // Obter pesquisas por research_id
 func GetSurveysByResearchId(c *gin.Context) {
 	researchId := c.Param("researchId")
-	surveyType := c.Param("survey_type")
 
-	surveys, err := services.GetSurveysByResearchId(researchId, surveyType)
+	var surveyType models.SurveyType
+
+	if err := c.ShouldBindJSON(&surveyType); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Erro ao processar os dados. Verifique as informações enviadas.",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	surveys, err := services.GetSurveysByResearchId(researchId, surveyType.Type)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Erro ao buscar pesquisas pelo research_id.",
