@@ -92,6 +92,13 @@ func SetupRouter() *gin.Engine {
 				}
 
 		}
+		//Grupo de Field options
+		field_option := api.Group("/fields/:fieldId/options")
+		{
+			field_option.GET("", controllers.GetAllFieldOptionsByFieldId)
+			field_option.POST("", controllers.CreateFieldOption)
+			field_option.DELETE("/:optionId", controllers.DeleteFieldOptionById)
+		}
 
 		// Grupo de tipos de input
 		api.GET("/input_types", controllers.GetInputTypes)
