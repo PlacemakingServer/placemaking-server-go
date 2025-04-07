@@ -1,12 +1,13 @@
 package repository
 
 import (
+	"errors"
 	"log"
 	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
 )
 
-func CreateField(surveyId, surveyType string, createFieldData models.CreateField) (models.Field, error) {
+func CreateField(surveyId string, createFieldData models.CreateField) (models.Field, error) {
 	supabase := db.GetSupabase()
 
 	var field models.Field
@@ -17,7 +18,7 @@ func CreateField(surveyId, surveyType string, createFieldData models.CreateField
 		"description":   createFieldData.Description,
 		"input_type_id": createFieldData.InputTypeId,
 		"survey_id":     surveyId,
-		"survey_type":   surveyType,
+		"survey_type":   createFieldData.SurveyType,
 	}
 
 	_, err := supabase.From("fields").
@@ -55,18 +56,27 @@ func GetAllFieldsBySurveyId(surveyId, surveyType string) ([]models.Field, error)
 func DeleteFieldBySurveyId(id, surveyId, surveyType string) error {
 	supabase := db.GetSupabase()
 
-	_, _, err := supabase.From("fields").
+	// Executa a operação de exclusão e retorna os registros afetados
+	var deletedRecords []models.Field
+	_, err := supabase.From("fields").
 		Delete("", "").
 		Eq("id", id).
 		Eq("survey_id", surveyId).
 		Eq("survey_type", surveyType).
-		Execute()
+		ExecuteTo(&deletedRecords)
 
 	if err != nil {
 		log.Println("[DeleteFieldBySurveyId] Erro ao deletar campo:", err)
 		return err
 	}
 
+	// Verifica se algum registro foi deletado
+	if len(deletedRecords) == 0 {
+		log.Println("[DeleteFieldBySurveyId] Nenhum campo encontrado para os critérios fornecidos.")
+		return errors.New("nenhum campo encontrado para os critérios fornecidos")
+	}
+
+	log.Println("[DeleteFieldBySurveyId] Campo deletado com sucesso.")
 	return nil
 }
 
