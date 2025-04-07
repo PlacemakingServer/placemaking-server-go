@@ -43,7 +43,7 @@ func SetupRouter() *gin.Engine {
 		}
 
 		// Grupo de pesquisas
-		researches := api.Group("/researches")
+		researches := api.Group("/research")
 		{
 			researches.POST("", controllers.CreateResearch)
 			researches.GET("", controllers.GetAllResearches)
@@ -59,13 +59,52 @@ func SetupRouter() *gin.Engine {
 				contributors.GET("/:userId", controllers.GetContributorByResearchAndUserId)
 				contributors.DELETE("/:userId", controllers.DeleteContributorByResearchAndUserId)
 			}
+
+			// Grupo de surveys dentro de uma pesquisa
+			surveys := researches.Group("/:researchId/survey")
+			{
+				surveys.GET("", controllers.GetSurveysByResearchId)
+				surveys.GET("/:surveyId", controllers.GetSurveyById) //survey**
+				surveys.DELETE("/:surveyId", controllers.DeleteSurveyById)
+			}
 		}
 
+		//Rotas para Contributors
 		contributor := api.Group("/contributors")
 		{
 			contributor.GET("/:id", controllers.GetContributorById)
 			contributor.PUT("/:id", controllers.UpdateContributorById)
 			contributor.DELETE("/:id", controllers.DeleteContributorById)
+		}
+
+		//Rotas para surveys
+		survey := api.Group("/survey")
+		{
+			survey.POST("", controllers.CreateSurvey)
+			survey.PUT("/:surveyId", controllers.UpdateSurveyById)
+
+			fields := survey.Group("/:surveyId/fields")
+				{
+					fields.POST("", controllers.CreateField)
+					fields.GET("", controllers.GetAllFieldsBySurveyId)
+					fields.PUT("/:fieldId", controllers.UpdateField)
+					fields.DELETE("/:fieldId", controllers.DeleteField)
+				}
+
+			survey_contributors := survey.Group("/:surveyId/contributors")
+			{
+				survey_contributors.GET("", controllers.GetSurveyContributorsBySurveyId)
+				survey_contributors.POST("", controllers.CreateSurveyContributor)
+				survey_contributors.DELETE("/:contributorId", controllers.DeleteSurveyContributor)
+			}
+
+		}
+		//Grupo de Field options
+		field_option := api.Group("/fields/:fieldId/options")
+		{
+			field_option.GET("", controllers.GetAllFieldOptionsByFieldId)
+			field_option.POST("", controllers.CreateFieldOption)
+			field_option.DELETE("/:optionId", controllers.DeleteFieldOptionById)
 		}
 
 		// Grupo de tipos de input
