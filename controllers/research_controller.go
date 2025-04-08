@@ -69,21 +69,30 @@ func UpdateResearch(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Pesquisa atualizada com sucesso.", "research": research})
 }
 
-// Deletar pesquisa por ID
 func DeleteResearch(c *gin.Context) {
 	id := c.Param("researchId")
 
+	resultChan := make(chan []models.Research, 1)
 	errChan := make(chan error, 1)
 
 	go func() {
-		errChan <- services.FetchDeleteResearch(id)
+		deletedResearch, err := services.FetchDeleteResearch(id)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		resultChan <- deletedResearch
 	}()
 
-	err := <-errChan
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao deletar pesquisa"})
+	select {
+	case err := <-errChan:
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao deletar pesquisa", "error": err})
 		return
+	case deletedResearch := <-resultChan:
+		if len(deletedResearch) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"message": "Nenhuma pesquisa encontrada para deletar"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Pesquisa apagada com sucesso."})
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Pesquisa apagada com sucesso."})
 }
