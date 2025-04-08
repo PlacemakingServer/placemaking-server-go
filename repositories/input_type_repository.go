@@ -19,8 +19,8 @@ func GetAllInputTypes() ([]models.InputType, error) {
 
 	// Converter JSON para struct
 	var inputTypes []models.InputType
-	err = json.Unmarshal(response, &inputTypes) // <- Passamos `response` diretamente
-	if err != nil {
+
+	if err = json.Unmarshal(response, &inputTypes); err != nil {
 		log.Println("Error decoding input types:", err)
 		return nil, err
 	}

@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"placemaking-backend-go/models"
-	"placemaking-backend-go/repositories"
+	repository "placemaking-backend-go/repositories"
 )
 
 // Criar uma nova pesquisa
