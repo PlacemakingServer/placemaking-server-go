@@ -2,9 +2,9 @@ package repository
 
 import (
 	"log"
-	"time"
 	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
+	"time"
 )
 
 func CreateResearch(createResearchData models.CreateResearch) (models.Research, error){
@@ -99,18 +99,20 @@ func UpdateResearchById(id string, updateResearchData models.UpdateResearch) (mo
 	return research, nil
 }
 
-func DeleteResearchById(id string) error {
+func DeleteResearchById(id string) ([]models.Research, error) {
 	supabase := db.GetSupabase()
 
-	_, _, err := supabase.From("research").
+	var deletedResearch []models.Research
+
+	_, err := supabase.From("research").
 		Delete("","").
 		Eq("id", id).
-		Execute()
+		ExecuteTo(&deletedResearch)
 
 	if err != nil {
 		log.Println("Erro ao deletar pesquisa:", err)
-		return err
+		return deletedResearch, err
 	}
 
-	return nil
+	return deletedResearch, nil
 }

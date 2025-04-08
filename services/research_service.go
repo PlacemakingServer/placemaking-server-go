@@ -49,11 +49,11 @@ func FetchUpdateResearch(id string, updateResearchData models.UpdateResearch) (m
 	return research, nil
 }
 
-func FetchDeleteResearch(id string) error {
-	err := repository.DeleteResearchById(id)
+func FetchDeleteResearch(id string) ([]models.Research, error) {
+	deletedResearch, err := repository.DeleteResearchById(id)
 	if err != nil {
 		log.Println("[FetchDeleteResearch] Erro ao deletar pesquisa:", err)
-		return err
+		return deletedResearch, err
 	}
-	return nil
+	return deletedResearch, nil
 }
