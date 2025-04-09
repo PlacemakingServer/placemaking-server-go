@@ -6,8 +6,8 @@ import (
 	repository "placemaking-backend-go/repositories"
 )
 
-func CreateContributor(researchId string, contributorData models.CreateContributor) (models.Contributor, error) {
-	contributor, err := repository.CreateContributor(researchId, contributorData)
+func CreateContributor(researchId, userId string, contributorData models.CreateContributor) (models.Contributor, error) {
+	contributor, err := repository.CreateContributor(researchId, userId, contributorData)
 	if err != nil {
 		log.Println("[Service] Erro ao criar colaborador:", err)
 		return models.Contributor{}, err

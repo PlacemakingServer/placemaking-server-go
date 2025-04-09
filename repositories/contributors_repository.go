@@ -7,14 +7,14 @@ import (
 	"placemaking-backend-go/models"
 )
 
-func CreateContributor(researchId string, contributorData models.CreateContributor) (models.Contributor, error) {
+func CreateContributor(researchId, userId string, contributorData models.CreateContributor) (models.Contributor, error) {
 	supabase := db.GetSupabase()
 
 	var contributor models.Contributor
 
 	// Criando um mapa para representar o colaborador
 	newContributor := map[string]interface{}{
-		"user_id":     contributorData.UserId,
+		"user_id":     userId,
 		"research_id": researchId,
 		"instruction": contributorData.Instruction,
 	}
