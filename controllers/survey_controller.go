@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
+	"net/url"
 	"placemaking-backend-go/models"
 	"placemaking-backend-go/services"
 
@@ -126,18 +128,11 @@ func DeleteSurveyById(c *gin.Context) {
 // Obter pesquisas por research_id
 func GetSurveysByResearchId(c *gin.Context) {
 	researchId := c.Param("researchId")
+	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))
 
-	var surveyType models.SurveyType
+	log.Println(surveyType)
 
-	if err := c.ShouldBindJSON(&surveyType); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Erro ao processar os dados. Verifique as informações enviadas.",
-			"error":   err.Error(),
-		})
-		return
-	}
-
-	surveys, err := services.GetSurveysByResearchId(researchId, surveyType.Type)
+	surveys, err := services.GetSurveysByResearchId(researchId, surveyType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Erro ao buscar pesquisas pelo research_id.",
@@ -147,7 +142,7 @@ func GetSurveysByResearchId(c *gin.Context) {
 	}
 
 	if len(surveys) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "Nenhuma pesquisa encontrada para o research_id informado.",
 		})
 		return

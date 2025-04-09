@@ -17,8 +17,9 @@ func CreateContributor(c *gin.Context) {
 		return
 	}
 	researchId := c.Param("researchId")
+	userId := c.Param("userId")
 
-	contributor, err := services.CreateContributor(researchId, contributorData)
+	contributor, err := services.CreateContributor(researchId, userId, contributorData)
 	if err != nil {
 		log.Println("[CreateContributor] Erro ao criar colaborador:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao criar colaborador", "error": err.Error()})
