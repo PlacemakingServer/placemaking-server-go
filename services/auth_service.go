@@ -1,17 +1,15 @@
 package services
 
 import (
-	"embed"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
+	"placemaking-backend-go/templates"
 	"placemaking-backend-go/models"
 	repository "placemaking-backend-go/repositories"
 )
-
-var templatesFS embed.FS
 
 func RegisterUser(createUserData models.CreateUser) (*models.SanitizedUser, string, error) {
 	// Verifica se os e-mails conferem
@@ -106,7 +104,7 @@ func SendUserData(data map[string]interface{}) error {
 	templateFilePath := "assets/templates/welcome.html"
 
 	// Lendo o arquivo do template
-	fileContent, err := templatesFS.ReadFile(templateFilePath)
+	fileContent, err := templates.FS.ReadFile(templateFilePath)
 	if err != nil {
 		fmt.Println("Erro ao ler template:", err)
 		return fmt.Errorf("erro ao ler o template de e-mail: %w", err)
@@ -177,7 +175,7 @@ func SendForgotEmailPasswordData(data map[string]interface{}) error {
 	templateFilePath := "assets/templates/recovery-password.html"
 
 	// Lendo o arquivo do template
-	fileContent, err := templatesFS.ReadFile(templateFilePath)
+	fileContent, err := templates.FS.ReadFile(templateFilePath)
 	if err != nil {
 		fmt.Println("Erro ao ler template:", err)
 		return fmt.Errorf("erro ao ler o template de e-mail: %w", err)
