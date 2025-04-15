@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"os"
+	"placemaking-backend-go/templates"
 	"placemaking-backend-go/models"
 	repository "placemaking-backend-go/repositories"
 )
@@ -101,11 +101,12 @@ func SendUserData(data map[string]interface{}) error {
 	}
 
 	// Caminho do arquivo de template HTML
-	templateFilePath := "./assets/templates/welcome.html"
+	templateFilePath := "assets/templates/welcome.html"
 
 	// Lendo o arquivo do template
-	fileContent, err := os.ReadFile(templateFilePath)
+	fileContent, err := templates.FS.ReadFile(templateFilePath)
 	if err != nil {
+		fmt.Println("Erro ao ler template:", err)
 		return fmt.Errorf("erro ao ler o template de e-mail: %w", err)
 	}
 
@@ -171,10 +172,10 @@ func SendForgotEmailPasswordData(data map[string]interface{}) error {
 	fmt.Printf("Enviando e-mail para %s (%s), token: %s\n", name, email, token)
 
 	// Caminho do arquivo de template HTML
-	templateFilePath := "./assets/templates/recovery-password.html"
+	templateFilePath := "assets/templates/recovery-password.html"
 
 	// Lendo o arquivo do template
-	fileContent, err := os.ReadFile(templateFilePath)
+	fileContent, err := templates.FS.ReadFile(templateFilePath)
 	if err != nil {
 		fmt.Println("Erro ao ler template:", err)
 		return fmt.Errorf("erro ao ler o template de e-mail: %w", err)

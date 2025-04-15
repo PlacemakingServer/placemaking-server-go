@@ -37,7 +37,7 @@ func SetupRouter() *gin.Engine {
 		users := api.Group("/users")
 		{
 			users.GET("/:id", controllers.GetUserById)
-			users.GET("/", controllers.GetAllUsers)
+			users.GET("", controllers.GetAllUsers)
 			users.PUT("/:id", controllers.UpdateUserById)
 			users.DELETE("/:id", controllers.DeleteUserById)
 		}
@@ -63,7 +63,7 @@ func SetupRouter() *gin.Engine {
 			// Grupo de surveys dentro de uma pesquisa
 			surveys := researches.Group("/:researchId/survey")
 			{
-				surveys.GET("/", controllers.GetSurveysByResearchId)
+				surveys.GET("", controllers.GetSurveysByResearchId)
 				surveys.GET("/:surveyId", controllers.GetSurveyById) //survey**
 				surveys.DELETE("/:surveyId", controllers.DeleteSurveyById)
 			}
