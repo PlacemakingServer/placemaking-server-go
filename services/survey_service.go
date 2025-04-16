@@ -7,12 +7,12 @@ import (
 )
 
 // Criar uma nova pesquisa
-func CreateSurvey(createSurveyData models.CreateSurvey) (models.Survey, error) {
+func CreateSurvey(surveyType string, createSurveyData models.CreateSurvey) (models.Survey, error) {
 	if createSurveyData.Title == "" || createSurveyData.ResearchId == "" {
 		return models.Survey{}, errors.New("título e ID da pesquisa são obrigatórios")
 	}
 
-	return repository.CreateSurvey(createSurveyData)
+	return repository.CreateSurvey(surveyType, createSurveyData)
 }
 
 // Obter todas as pesquisas

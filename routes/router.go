@@ -98,6 +98,19 @@ func SetupRouter() *gin.Engine {
 				survey_contributors.DELETE("/:contributorId", controllers.DeleteSurveyContributor)
 			}
 
+			survey_answers := survey.Group("/:surveyId/answers")
+			{
+				survey_answers.POST("", controllers.CreateSurveyAnswer)
+				survey_answers.GET("", controllers.GetSurveyAnswers)
+				survey_answers.DELETE("/:answerId", controllers.DeleteSurveyAnswer)
+			}
+
+			survey_group := survey.Group("/:surveyId/group")
+			{
+				survey_group.POST("", controllers.CreateSurveyGroup)
+				survey_group.GET("", controllers.GetSurveyGroups)
+				survey_group.DELETE("/:groupId", controllers.DeleteSurveyGroup)
+			}
 		}
 		//Grupo de Field options
 		field_option := api.Group("/fields/:fieldId/options")

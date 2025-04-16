@@ -17,7 +17,6 @@ type CreateSurvey struct {
 	Long          float32 `json:"long"`
 	LocationTitle string  `json:"location_title"`
 	ResearchId    string  `json:"research_id"`
-	SurveyType    string  `json:"survey_type"`
 }
 
 type UpdateSurvey struct {
@@ -26,7 +25,6 @@ type UpdateSurvey struct {
 	Lat           float32 `json:"lat"`
 	Long          float32 `json:"long"`
 	LocationTitle string  `json:"location_title"`
-	SurveyType    string  `json:"survey_type"`
 }
 
 type SurveyType struct {
