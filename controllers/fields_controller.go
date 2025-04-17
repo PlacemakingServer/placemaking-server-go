@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"placemaking-backend-go/models"
 	"placemaking-backend-go/services"
-
+	"net/url"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,9 @@ func CreateField(c *gin.Context) {
 		return
 	}
 
-	field, err := services.CreateFieldService(surveyId, createFieldData.SurveyType, createFieldData)
+	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))
+
+	field, err := services.CreateFieldService(surveyId, surveyType, createFieldData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao criar campo", "error": err.Error()})
 		return
@@ -31,13 +33,9 @@ func CreateField(c *gin.Context) {
 func GetAllFieldsBySurveyId(c *gin.Context) {
 	surveyId := c.Param("surveyId")
 
-	var surveyType models.SurveyType
-	if err := c.ShouldBindJSON(&surveyType); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Dados inválidos", "error": err.Error()})
-		return
-	}
+	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))
 
-	fields, err := services.GetAllFieldsBySurveyIdService(surveyId, surveyType.Type)
+	fields, err := services.GetAllFieldsBySurveyIdService(surveyId, surveyType)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao buscar campos", "error": err.Error()})
 		return
@@ -51,18 +49,14 @@ func DeleteField(c *gin.Context) {
 	fieldId := c.Param("fieldId")
 	surveyId := c.Param("surveyId")
 
-	var surveyType models.SurveyType
-	if err := c.ShouldBindJSON(&surveyType); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Dados inválidos", "error": err.Error()})
-		return
-	}
+	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))
 
 	// Criando um canal para capturar erros da goroutine
 	errChan := make(chan error, 1)
 
 	// Executando a exclusão em uma goroutine
 	go func() {
-		err := services.DeleteFieldBySurveyIdService(fieldId, surveyId, surveyType.Type)
+		err := services.DeleteFieldBySurveyIdService(fieldId, surveyId, surveyType)
 		errChan <- err // Envia erro para o canal (se houver)
 		close(errChan) // Fecha o canal após o envio do erro
 	}()
@@ -80,6 +74,7 @@ func DeleteField(c *gin.Context) {
 func UpdateField(c *gin.Context) {
 	fieldId := c.Param("fieldId")
 	surveyId := c.Param("surveyId")
+	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))
 
 	var updateFieldData models.CreateField
 	if err := c.ShouldBindJSON(&updateFieldData); err != nil {
@@ -87,7 +82,7 @@ func UpdateField(c *gin.Context) {
 		return
 	}
 
-	field, err := services.UpdateFieldService(fieldId, surveyId, updateFieldData.SurveyType, updateFieldData)
+	field, err := services.UpdateFieldService(fieldId, surveyId, surveyType, updateFieldData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao atualizar campo", "error": err.Error()})
 		return

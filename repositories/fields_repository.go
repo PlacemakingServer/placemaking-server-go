@@ -7,7 +7,7 @@ import (
 	"placemaking-backend-go/models"
 )
 
-func CreateField(surveyId string, createFieldData models.CreateField) (models.Field, error) {
+func CreateField(surveyId, surveyType string, createFieldData models.CreateField) (models.Field, error) {
 	supabase := db.GetSupabase()
 
 	var field models.Field
@@ -18,7 +18,7 @@ func CreateField(surveyId string, createFieldData models.CreateField) (models.Fi
 		"description":   createFieldData.Description,
 		"input_type_id": createFieldData.InputTypeId,
 		"survey_id":     surveyId,
-		"survey_type":   createFieldData.SurveyType,
+		"survey_type":   surveyType,
 	}
 
 	_, err := supabase.From("fields").

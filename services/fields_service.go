@@ -7,7 +7,7 @@ import (
 
 // CreateFieldService cria um novo campo para um survey específico
 func CreateFieldService(surveyId, surveyType string, createFieldData models.CreateField) (models.Field, error) {
-	return repository.CreateField(surveyId, createFieldData)
+	return repository.CreateField(surveyId, surveyType, createFieldData)
 }
 
 // GetAllFieldsBySurveyIdService retorna todos os campos de um survey específico
