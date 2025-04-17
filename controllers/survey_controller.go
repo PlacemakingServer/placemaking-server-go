@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Criar uma nova pesquisa
 func CreateSurvey(c *gin.Context) {
 	var createSurveyData models.CreateSurvey
 
@@ -41,7 +40,7 @@ func CreateSurvey(c *gin.Context) {
 func GetSurveyById(c *gin.Context) {
 	id := c.Param("surveyId")
 	researchId := c.Param("researchId")
-	
+
 	var surveyType models.SurveyType
 
 	if err := c.ShouldBindJSON(&surveyType); err != nil {
@@ -51,7 +50,6 @@ func GetSurveyById(c *gin.Context) {
 		})
 		return
 	}
-
 
 	survey, err := services.GetSurveyById(id, researchId, surveyType.Type)
 	if err != nil {
@@ -71,7 +69,6 @@ func GetSurveyById(c *gin.Context) {
 // Atualizar uma pesquisa por ID
 func UpdateSurveyById(c *gin.Context) {
 	id := c.Param("surveyId")
-	
 
 	var updateData models.UpdateSurvey
 	if err := c.ShouldBindJSON(&updateData); err != nil {
@@ -100,8 +97,8 @@ func UpdateSurveyById(c *gin.Context) {
 // Deletar uma pesquisa por ID
 func DeleteSurveyById(c *gin.Context) {
 	id := c.Param("surveyId")
-	
-		var surveyType models.SurveyType
+
+	var surveyType models.SurveyType
 
 	if err := c.ShouldBindJSON(&surveyType); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -121,7 +118,7 @@ func DeleteSurveyById(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":        "Pesquisa deletada com sucesso.",
+		"message": "Pesquisa deletada com sucesso.",
 	})
 }
 
