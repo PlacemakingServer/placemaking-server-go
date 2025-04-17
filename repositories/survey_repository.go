@@ -13,7 +13,7 @@ var surveyTypeMap = map[string]string{
 	"Dinâmica":   "dynamic_surveys",
 }
 
-func CreateSurvey(createSurveyData models.CreateSurvey) (models.Survey, error) {
+func CreateSurvey(surveyType string, createSurveyData models.CreateSurvey) (models.Survey, error) {
 	supabase := db.GetSupabase()
 
 	// Criando um mapa para representar os dados da pesquisa
@@ -28,9 +28,9 @@ func CreateSurvey(createSurveyData models.CreateSurvey) (models.Survey, error) {
 
 	var survey models.Survey
 
-	tableName, exists := surveyTypeMap[createSurveyData.SurveyType]
+	tableName, exists := surveyTypeMap[surveyType]
 	if !exists {
-		err := fmt.Errorf("tipo de survey inválido: %s", createSurveyData.SurveyType)
+		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
 		log.Println("[CreateSurvey] Erro:", err)
 		return models.Survey{}, err
 	}

@@ -7,6 +7,5 @@ type SurveyGroup struct {
 }
 
 type CreateSurveyGroup struct {
-	SurveyId   string `json:"survey_id"`
 	SurveyType string `json:"survey_type"`
 }
