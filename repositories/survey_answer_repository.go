@@ -1,73 +1,145 @@
 package repository
 
 import (
-	"errors"
 	"log"
 	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
 )
 
-func GetAllAnswersBySurveyId(surveyId string) ([]models.SurveyAnswer, error) {
-	supabase := db.GetSupabase()
-
-	var surveyAnswers []models.SurveyAnswer
-
-	_, err := supabase.From("survey_answers").Select("*", "", false).Eq("survey_id", surveyId).ExecuteTo(&surveyAnswers)
-
-	if err != nil {
-		log.Println("[GetAllAnswersBySurveyId] Erro ao buscar respostas no banco de dados:", err)
-		return []models.SurveyAnswer{}, err
-	}
-
-	return surveyAnswers, nil
-}
-
-func CreateSurveyAnswer(surveyId, surveyType, contributorId string, answerData models.CreateSurveyAnswer) (models.SurveyAnswer, error) {
+func CreateSurveyAnswer(surveyId, surveyType, contributorId string, surveyAnswerData models.CreateSurveyAnswer) (models.SurveyAnswer, error) {
 	supabase := db.GetSupabase()
 
 	// Convertendo para map[string]interface{}
 	insertData := map[string]interface{}{
-		"value":      answerData.Value,
-		"survey_group_id": answerData.SurveyGroupId,
-		"survey_id":  surveyId,
+		"value":      surveyAnswerData.Value,
+		"survey_id":   surveyId,
 		"survey_type": surveyType,
 		"contributor_id": contributorId,
+		"registered_at": surveyAnswerData.RegisteredAt,
+		"survey_group_id": surveyAnswerData.SurveyGroupId,
+		"survey_time_range_id": surveyAnswerData.SurveyTimeRangeId,
+		"survey_region_id": surveyAnswerData.SurveyRegionId,
 	}
 
-	var createdAnswer models.SurveyAnswer
+	var createdSurveyAnswer models.SurveyAnswer
 
 	_, err := supabase.
 		From("survey_answers").
 		Insert(insertData, false, "", "", "").
 		Single().
-		ExecuteTo(&createdAnswer)
+		ExecuteTo(&createdSurveyAnswer)
 
 	if err != nil {
-		log.Println("[CreateSurveyAnswer] Erro ao criar resposta no banco de dados:", err)
+		log.Println("[CreateSurveyAnswer] Erro ao criar resposta de pesquisa no banco de dados:", err)
 		return models.SurveyAnswer{}, err
 	}
 
-	return createdAnswer, nil
+	return createdSurveyAnswer, nil
+
 }
 
-func DeleteSurveyAnswer(id string) error {
+func GetAllSurveyAnswersBySurveyId(surveyId string) ([]models.SurveyAnswer, error) {
 	supabase := db.GetSupabase()
 
-	// Executa o delete na tabela survey_answers, filtrando pelo ID
-	res, _, err := supabase.
-		From("survey_answers").
-		Delete("", "").
-		Eq("id", id).
-		Execute()
+	var surveyAnswers []models.SurveyAnswer
+
+	_, err := supabase.From("survey_answers").
+		Select("*", "", false).
+		Eq("survey_id", surveyId).
+		ExecuteTo(&surveyAnswers)
 
 	if err != nil {
-		log.Printf("[DeleteSurveyAnswer] Erro ao deletar resposta: %v\n", err)
-		return err
+		log.Println("[GetAllSurveyAnswersBySurveyId] Erro ao buscar respostas de pesquisa no banco de dados:", err)
+		return []models.SurveyAnswer{}, err
 	}
 
-	if len(res) == 0 {
-		return errors.New("resposta selecionada não existe ou já foi deletada")
+	return surveyAnswers, nil
+
+}
+
+func GetAllAnswersByContributorId(contributorId string) ([]models.SurveyAnswer, error) {
+	supabase := db.GetSupabase()
+
+	var surveyAnswers []models.SurveyAnswer
+
+	_, err := supabase.From("survey_answers").
+		Select("*", "", false).
+		Eq("contributor_id", contributorId).
+		ExecuteTo(&surveyAnswers)
+
+	if err != nil {
+		log.Println("[GetAllAnswersByContributorId] Erro ao buscar respostas de pesquisa no banco de dados:", err)
+		return []models.SurveyAnswer{}, err
 	}
 
-	return nil
+	return surveyAnswers, nil
+
+}
+
+func GetSurveyAnswerById(id string) (models.SurveyAnswer, error) {
+	supabase := db.GetSupabase()
+
+	var surveyAnswer models.SurveyAnswer
+
+	_, err := supabase.From("survey_answers").
+		Select("*", "", false).
+		Eq("id", id).
+		Single().
+		ExecuteTo(&surveyAnswer)
+
+	if err != nil {
+		log.Println("[GetSurveyAnswerById] Erro ao buscar resposta de pesquisa no banco de dados:", err)
+		return models.SurveyAnswer{}, err
+	}
+
+	return surveyAnswer, nil
+
+}
+
+func DeleteSurveyAnswerById(id string) ([]models.SurveyAnswer, error) {
+	supabase := db.GetSupabase()
+
+	var deletedAnswers []models.SurveyAnswer
+
+	_, err := supabase.From("survey_answers").
+		Delete("","").
+		Eq("id", id).
+		ExecuteTo(&deletedAnswers)
+
+	if err != nil {
+		log.Println("[DeleteSurveyAnswerById] Erro ao deletar resposta de pesquisa no banco de dados:", err)
+		return deletedAnswers, err
+	}
+
+	return deletedAnswers, nil
+}
+
+func UpdateSurveyAnswerById(id string, surveyAnswerData models.UpdateSurveyAnswer) (models.SurveyAnswer, error) {
+	supabase := db.GetSupabase()
+
+	// Convertendo para map[string]interface{}
+	updateData := map[string]interface{}{
+		"value":      surveyAnswerData.Value,
+		"registered_at": surveyAnswerData.RegisteredAt,
+		"survey_group_id": surveyAnswerData.SurveyGroupId,
+		"survey_time_range_id": surveyAnswerData.SurveyTimeRangeId,
+		"survey_region_id": surveyAnswerData.SurveyRegionId,
+	}
+
+	var updatedSurveyAnswer models.SurveyAnswer
+
+	_, err := supabase.
+		From("survey_answers").
+		Update(updateData, "", "").
+		Eq("id", id).
+		Single().
+		ExecuteTo(&updatedSurveyAnswer)
+
+	if err != nil {
+		log.Println("[UpdateSurveyAnswerById] Erro ao atualizar resposta de pesquisa no banco de dados:", err)
+		return models.SurveyAnswer{}, err
+	}
+
+	return updatedSurveyAnswer, nil
+
 }

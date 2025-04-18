@@ -1,53 +1,63 @@
 package services
 
 import (
-    "errors"
-    "placemaking-backend-go/models"
-    repo "placemaking-backend-go/repositories"
+	"log"
+	"placemaking-backend-go/models"
+	repository "placemaking-backend-go/repositories"
 )
 
-// GetSurveyAnswers retorna todas as respostas de uma pesquisa específica
-func GetSurveyAnswers(surveyId string) ([]models.SurveyAnswer, error) {
-    if surveyId == "" {
-        return nil, errors.New("surveyId não pode ser vazio")
-    }
-
-    answers, err := repo.GetAllAnswersBySurveyId(surveyId)
-    if err != nil {
-        return nil, err
-    }
-    return answers, nil
-}
-
-// CreateSurveyAnswer cria uma nova resposta para uma pesquisa
+// CreateSurveyAnswer cria uma nova resposta de pesquisa no banco de dados
 func CreateSurveyAnswer(surveyId, surveyType, contributorId string, data models.CreateSurveyAnswer) (models.SurveyAnswer, error) {
-    // Validação básica dos campos
-    if surveyId == "" || surveyType == "" || contributorId == "" {
-        return models.SurveyAnswer{}, errors.New("surveyId, surveyType e contributorId não podem ser vazios")
-    }
-    if data.Value == "" {
-        return models.SurveyAnswer{}, errors.New("o campo Value não pode ser vazio")
-    }
-    if data.SurveyGroupId == "" {
-        return models.SurveyAnswer{}, errors.New("surveyGroupId não pode ser vazio")
-    }
 
-    answer, err := repo.CreateSurveyAnswer(surveyId, surveyType, contributorId, data)
-    if err != nil {
-        return models.SurveyAnswer{}, err
-    }
-    return answer, nil
+	answer, err := repository.CreateSurveyAnswer(surveyId, surveyType, contributorId, data)
+	if err != nil {
+		log.Println("[CreateSurveyAnswer] Erro ao criar resposta de pesquisa no banco de dados:", err)
+		return models.SurveyAnswer{}, err
+	}
+	return answer, nil
 }
 
-// DeleteSurveyAnswer remove uma resposta de pesquisa pelo seu ID
-func DeleteSurveyAnswer(id string) error {
-    if id == "" {
-        return errors.New("id da resposta não pode ser vazio")
-    }
+func GetSurveyAnswersBySurveyId(surveyId string) ([]models.SurveyAnswer, error) {
+	answers, err := repository.GetAllSurveyAnswersBySurveyId(surveyId)
+	if err != nil {
+		log.Println("[GetSurveyAnswersBySurveyId] Erro ao buscar respostas de pesquisa no banco de dados:", err)
+		return nil, err
+	}
+	return answers, nil
+}
 
-    err := repo.DeleteSurveyAnswer(id)
-    if err != nil {
-        return err
-    }
-    return nil
+func GetSurveyAnswersByContributorId(contributorId string) ([]models.SurveyAnswer, error) {
+	answers, err := repository.GetAllAnswersByContributorId(contributorId)
+	if err != nil {
+		log.Println("[GetSurveyAnswersByContributorId] Erro ao buscar respostas de pesquisa no banco de dados:", err)
+		return nil, err
+	}
+	return answers, nil
+}
+
+func GetSurveyAnswerById(id string) (models.SurveyAnswer, error) {
+	answer, err := repository.GetSurveyAnswerById(id)
+	if err != nil {
+		log.Println("[GetSurveyAnswerById] Erro ao buscar resposta de pesquisa no banco de dados:", err)
+		return models.SurveyAnswer{}, err
+	}
+	return answer, nil
+}
+
+func UpdateSurveyAnswerById(id string, data models.UpdateSurveyAnswer) (models.SurveyAnswer, error) {
+	answers, err := repository.UpdateSurveyAnswerById(id, data)
+	if err != nil {
+		log.Println("[UpdateSurveyAnswerById] Erro ao atualizar resposta de pesquisa no banco de dados:", err)
+		return models.SurveyAnswer{}, err
+	}
+	return answers, nil
+}
+
+func DeleteSurveyAnswerById(id string) ([]models.SurveyAnswer, error) {
+	answers, err := repository.DeleteSurveyAnswerById(id)
+	if err != nil {
+		log.Println("[DeleteSurveyAnswerById] Erro ao deletar resposta de pesquisa no banco de dados:", err)
+		return nil, err
+	}
+	return answers, nil
 }
