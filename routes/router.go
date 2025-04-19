@@ -72,9 +72,10 @@ func SetupRouter() *gin.Engine {
 		//Rotas para Contributors
 		contributor := api.Group("/contributors")
 		{
-			contributor.GET("/:id", controllers.GetContributorById)
-			contributor.PUT("/:id", controllers.UpdateContributorById)
-			contributor.DELETE("/:id", controllers.DeleteContributorById)
+			contributor.GET("/:contributorId", controllers.GetContributorById)
+			contributor.PUT("/:contributorId", controllers.UpdateContributorById)
+			contributor.DELETE("/:contributorId", controllers.DeleteContributorById)
+			contributor.GET("/:contributorId/answers", controllers.GetSurveyAnswersByContributorId)
 		}
 
 		//Rotas para surveys
@@ -84,12 +85,12 @@ func SetupRouter() *gin.Engine {
 			survey.PUT("/:surveyId", controllers.UpdateSurveyById)
 
 			fields := survey.Group("/:surveyId/fields")
-				{
-					fields.POST("", controllers.CreateField)
-					fields.GET("", controllers.GetAllFieldsBySurveyId)
-					fields.PUT("/:fieldId", controllers.UpdateField)
-					fields.DELETE("/:fieldId", controllers.DeleteField)
-				}
+			{
+				fields.POST("", controllers.CreateField)
+				fields.GET("", controllers.GetAllFieldsBySurveyId)
+				fields.PUT("/:fieldId", controllers.UpdateField)
+				fields.DELETE("/:fieldId", controllers.DeleteField)
+			}
 
 			survey_contributors := survey.Group("/:surveyId/contributors")
 			{
@@ -101,8 +102,10 @@ func SetupRouter() *gin.Engine {
 			survey_answers := survey.Group("/:surveyId/answers")
 			{
 				survey_answers.POST("", controllers.CreateSurveyAnswer)
-				survey_answers.GET("", controllers.GetSurveyAnswers)
-				survey_answers.DELETE("/:answerId", controllers.DeleteSurveyAnswer)
+				survey_answers.GET("", controllers.GetSurveyAnswersBySurveyId)
+				survey_answers.DELETE("/:answerId", controllers.DeleteSurveyAnswerById)
+				survey_answers.GET("/:answerId", controllers.GetSurveyAnswerById)
+				survey_answers.PUT("/:answerId", controllers.UpdateSurveyAnswerById)
 			}
 
 			survey_group := survey.Group("/:surveyId/group")
@@ -110,6 +113,25 @@ func SetupRouter() *gin.Engine {
 				survey_group.POST("", controllers.CreateSurveyGroup)
 				survey_group.GET("", controllers.GetSurveyGroups)
 				survey_group.DELETE("/:groupId", controllers.DeleteSurveyGroup)
+			}
+
+			survey_region := survey.Group("/:surveyId/region")
+			{
+				survey_region.POST("", controllers.CreateSurveyRegion)
+				survey_region.GET("", controllers.GetAllSurveyRegionsBySurveyId)
+				survey_region.DELETE("/:regionId", controllers.DeleteSurveyRegion)
+				survey_region.GET("/:regionId", controllers.GetSurveyRegionById)
+				survey_region.PUT("/:regionId", controllers.UpdateSurveyRegionById)
+
+			}
+
+			survey_time_range := survey.Group("/:surveyId/time")
+			{
+				survey_time_range.POST("", controllers.CreateSurveyTimeRange)
+				survey_time_range.GET("", controllers.GetAllSurveyTimeRangeBySurveyId)
+				survey_time_range.DELETE("/:timeRangeId", controllers.DeleteSurveyTimeRange)
+				survey_time_range.GET("/:timeRangeId", controllers.GetSurveyTimeRangeById)
+				survey_time_range.PUT("/:timeRangeId", controllers.UpdateSurveyTimeRangeById)
 			}
 		}
 		//Grupo de Field options

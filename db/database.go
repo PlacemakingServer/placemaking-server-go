@@ -31,7 +31,6 @@ func InitSupabase() {
 	}
 
 	Supabase = client
-	log.Println("✅ Conectado ao Supabase com sucesso!")
 }
 
 // Função para acessar o Supabase em outras partes do código
