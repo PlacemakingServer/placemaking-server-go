@@ -17,27 +17,67 @@ func FetchCreateResearch(createResearchData models.CreateResearch) (models.Resea
 	return research, nil
 }
 
-func FetchAllResearches() ([]models.Research, error) {
-	var researchs []models.Research
+func FetchAllResearches() ([]models.ViewResearch, error) {
 
-	researchs, err := repository.GetAllResearches()
-
+	researches, err := repository.GetAllResearches()
 	if err != nil {
-		log.Println("[FetchAllResearchs] Erro ao buscar pesquisas:", err)
+		log.Println("[Service] Erro ao buscar pesquisas:", err)
+		return nil, err
 	}
 
-	return researchs, nil
+	var viewResearches []models.ViewResearch
+	for _, research := range researches {
+		user, err := repository.GetUserById(research.CreatedBy)
+		if err != nil {
+			log.Println("[Service] Erro ao buscar usuário da pesquisa:", err)
+			return nil, err
+		}
+
+		viewResearch := models.ViewResearch{
+			Id:            research.Id,
+			Title:         research.Title,
+			Description:   research.Description,
+			ReleaseDate:   research.ReleaseDate,
+			CreatedBy:     models.SanitizeUser(user),
+			Lat:           research.Lat,
+			Long:          research.Long,
+			LocationTitle: research.LocationTitle,
+			EndDate:       research.EndDate,
+		}
+
+		viewResearches = append(viewResearches, viewResearch)
+	}
+
+	return viewResearches, nil
 }
 
-func FetchResearchById(id string) (models.Research, error){
+func FetchResearchById(id string) (models.ViewResearch, error){
 	
 	research, err := repository.GetResearchById(id)
-
 	if err != nil {
-		log.Println("[FecthResearchById] Erro ao buscar pesquisa:", err)
+		log.Println("[Service] Erro ao buscar pesquisa por ID:", err)
+		return models.ViewResearch{}, err
 	}
 
-	return research, nil
+	user, err := repository.GetUserById(research.CreatedBy)
+	if err != nil {
+		log.Println("[Service] Erro ao buscar usuário da pesquisa:", err)
+		return models.ViewResearch{}, err
+	}
+
+	viewResearch := models.ViewResearch{
+		Id:            research.Id,
+		Title:         research.Title,
+		Description:   research.Description,
+		ReleaseDate:   research.ReleaseDate,
+		CreatedBy:     models.SanitizeUser(user),
+		Lat:           research.Lat,
+		Long:          research.Long,
+		LocationTitle: research.LocationTitle,
+		EndDate:       research.EndDate,
+	}
+
+	return viewResearch, nil
 }
 
 func FetchUpdateResearch(id string, updateResearchData models.UpdateResearch) (models.Research, error) {

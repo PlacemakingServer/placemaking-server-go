@@ -23,6 +23,18 @@ type Research struct {
 	EndDate       string  `json:"end_date"`
 }
 
+type ViewResearch struct {
+	Id            string        `json:"id"`
+	Title         string        `json:"title"`
+	Description   string        `json:"description"`
+	ReleaseDate   string        `json:"release_date"`
+	CreatedBy     SanitizedUser `json:"created_by"`
+	Lat           float32       `json:"lat"`
+	Long          float32       `json:"long"`
+	LocationTitle string        `json:"location_title"`
+	EndDate       string        `json:"end_date"`
+}
+
 type UpdateResearch struct {
 	Title         string  `json:"title"`
 	Description   string  `json:"description"`
@@ -32,4 +44,3 @@ type UpdateResearch struct {
 	LocationTitle string  `json:"location_title"`
 	EndDate       string  `json:"end_date"`
 }
-
