@@ -8,6 +8,7 @@ type Survey struct {
 	Long          float32 `json:"long"`
 	LocationTitle string  `json:"location_title"`
 	ResearchId    string  `json:"research_id"`
+	SurveyType    string  `json:"survey_type"`
 }
 
 type CreateSurvey struct {
