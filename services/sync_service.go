@@ -1,25 +1,30 @@
 package services
 
 import (
-	"context"
 	"time"
 
-	"placemaking-backend-go/database"
+	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
 )
 
-// Utilitário genérico de fetch com filtro de data
 func fetchSince[T any](table string, fromDate time.Time) ([]T, error) {
 	var results []T
-	ctx := context.Background()
 
-	err := database.SupabaseClient.
+	_, err := db.GetSupabase().
 		From(table).
 		Select("*", "exact", false).
-		GTE("created_at", fromDate.Format(time.RFC3339)).
-		Execute(ctx, &results)
+		Gte("created_at", fromDate.Format(time.RFC3339)).
+		ExecuteTo(&results)
 
 	return results, err
+}
+func UpsertGeneric(table string, items []map[string]interface{}) error {
+	_, _, err := db.GetSupabase().
+		From(table).
+		Upsert(items, "id", "minimal", "").
+		Execute()
+
+	return err
 }
 
 func GetUsersSince(fromDate time.Time) ([]models.User, error) {
@@ -30,8 +35,8 @@ func GetResearchesSince(fromDate time.Time) ([]models.Research, error) {
 	return fetchSince[models.Research]("researches", fromDate)
 }
 
-func GetResearchContributorsSince(fromDate time.Time) ([]models.ResearchContributor, error) {
-	return fetchSince[models.ResearchContributor]("research_contributors", fromDate)
+func GetResearchContributorsSince(fromDate time.Time) ([]models.Contributor, error) {
+	return fetchSince[models.Contributor]("research_contributors", fromDate)
 }
 
 func GetFieldsSince(fromDate time.Time) ([]models.Field, error) {
@@ -50,16 +55,16 @@ func GetSurveyAnswersSince(fromDate time.Time) ([]models.SurveyAnswer, error) {
 	return fetchSince[models.SurveyAnswer]("survey_answers", fromDate)
 }
 
-func GetStaticSurveysSince(fromDate time.Time) ([]models.StaticSurvey, error) {
-	return fetchSince[models.StaticSurvey]("static_surveys", fromDate)
+func GetStaticSurveysSince(fromDate time.Time) ([]models.Survey, error) {
+	return fetchSince[models.Survey]("static_surveys", fromDate)
 }
 
-func GetFormSurveysSince(fromDate time.Time) ([]models.FormSurvey, error) {
-	return fetchSince[models.FormSurvey]("form_surveys", fromDate)
+func GetFormSurveysSince(fromDate time.Time) ([]models.Survey, error) {
+	return fetchSince[models.Survey]("form_surveys", fromDate)
 }
 
-func GetDynamicSurveysSince(fromDate time.Time) ([]models.DynamicSurvey, error) {
-	return fetchSince[models.DynamicSurvey]("dynamic_surveys", fromDate)
+func GetDynamicSurveysSince(fromDate time.Time) ([]models.Survey, error) {
+	return fetchSince[models.Survey]("dynamic_surveys", fromDate)
 }
 
 func GetSurveyTimeRangesSince(fromDate time.Time) ([]models.SurveyTimeRange, error) {
