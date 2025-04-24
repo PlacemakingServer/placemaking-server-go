@@ -166,15 +166,35 @@ func DeleteSurveyById(id, surveyType string) (models.Survey, error) {
 // Buscar pesquisas por research_id
 func GetSurveysByResearchId(researchId, surveyType string) ([]models.Survey, error) {
 	supabase := db.GetSupabase()
+	var surveys []models.Survey
+
+	if surveyType == "all" {
+		tables := []string{"form_surveys", "static_surveys", "dynamic_surveys"}
+
+		for _, tableName := range tables {
+			var partial []models.Survey
+			_, err := supabase.From(tableName).
+				Select("*", "", false).
+				Eq("research_id", researchId).
+				ExecuteTo(&partial)
+
+			if err != nil {
+				log.Printf("[GetSurveysByResearchId] Erro ao buscar da tabela %s: %v", tableName, err)
+				return nil, err
+			}
+
+			surveys = append(surveys, partial...)
+		}
+
+		return surveys, nil
+	}
 
 	tableName, exists := surveyTypeMap[surveyType]
 	if !exists {
 		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
-		log.Println("[CreateSurvey] Erro:", err)
+		log.Println("[GetSurveysByResearchId] Erro:", err)
 		return []models.Survey{}, err
 	}
-
-	var surveys []models.Survey
 
 	_, err := supabase.From(tableName).
 		Select("*", "", false).
@@ -182,6 +202,7 @@ func GetSurveysByResearchId(researchId, surveyType string) ([]models.Survey, err
 		ExecuteTo(&surveys)
 
 	if err != nil {
+		log.Printf("[GetSurveysByResearchId] Erro na busca única: %v", err)
 		return nil, err
 	}
 
