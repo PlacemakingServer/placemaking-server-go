@@ -142,6 +142,13 @@ func SetupRouter() *gin.Engine {
 			field_option.DELETE("/:optionId", controllers.DeleteFieldOptionById)
 		}
 
+		// Grupo de sincronização
+		sync := api.Group("/sync")
+		{
+			sync.GET("/:entity", controllers.SyncGet)
+			sync.PATCH("/:entity", controllers.SyncPatch)
+		}
+
 		// Grupo de tipos de input
 		api.GET("/input_types", controllers.GetInputTypes)
 	}
