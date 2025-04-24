@@ -38,7 +38,6 @@ func CreateSurvey(c *gin.Context) {
 	})
 }
 
-// Obter uma pesquisa por ID
 func GetSurveyById(c *gin.Context) {
 	id := c.Param("surveyId")
 	researchId := c.Param("researchId")
@@ -60,7 +59,6 @@ func GetSurveyById(c *gin.Context) {
 	})
 }
 
-// Atualizar uma pesquisa por ID
 func UpdateSurveyById(c *gin.Context) {
 	id := c.Param("surveyId")
 
@@ -90,7 +88,6 @@ func UpdateSurveyById(c *gin.Context) {
 	})
 }
 
-// Deletar uma pesquisa por ID
 func DeleteSurveyById(c *gin.Context) {
 	id := c.Param("surveyId")
 
@@ -110,7 +107,6 @@ func DeleteSurveyById(c *gin.Context) {
 	})
 }
 
-// Obter pesquisas por research_id
 func GetSurveysByResearchId(c *gin.Context) {
 	researchId := c.Param("researchId")
 	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))

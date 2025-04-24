@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Criar uma nova pesquisa
 func CreateResearch(c *gin.Context) {
 	var createResearchData models.CreateResearch
 
@@ -23,10 +22,9 @@ func CreateResearch(c *gin.Context) {
 		return
 	}
 
-c.JSON(http.StatusCreated, gin.H{"message": "Pesquisa criada com sucesso!", "research": research})
+	c.JSON(http.StatusCreated, gin.H{"message": "Pesquisa criada com sucesso!", "research": research})
 }
 
-// Buscar todas as pesquisas
 func GetAllResearches(c *gin.Context) {
 	researches, err := services.FetchAllResearches()
 	if err != nil {
@@ -37,7 +35,6 @@ func GetAllResearches(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Lista de pesquisas encontradas.", "researches": researches})
 }
 
-// Buscar pesquisa por ID
 func GetResearchById(c *gin.Context) {
 	id := c.Param("researchId")
 
@@ -50,7 +47,6 @@ func GetResearchById(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Pesquisa encontrada com sucesso.", "research": research})
 }
 
-// Atualizar pesquisa por ID
 func UpdateResearch(c *gin.Context) {
 	id := c.Param("researchId")
 	var updateResearchData models.UpdateResearch
