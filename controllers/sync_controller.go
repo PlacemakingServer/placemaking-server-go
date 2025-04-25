@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -23,7 +24,7 @@ func SyncGet(c *gin.Context) {
 
 	switch entity {
 	case "users":
-		data, err = services.GetUsersSince(fromDate)
+		data, err = services.GetUsersSince()
 	case "researches":
 		data, err = services.GetResearchesSince(fromDate)
 	case "research_contributors":
@@ -56,7 +57,9 @@ func SyncGet(c *gin.Context) {
 	}
 
 	if err != nil {
+		fmt.Printf("[SyncGet][%s] erro: %v\n", entity, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
 		return
 	}
 

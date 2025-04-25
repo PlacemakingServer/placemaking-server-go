@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-func CreateResearch(createResearchData models.CreateResearch) (models.Research, error){
+func CreateResearch(createResearchData models.CreateResearch) (models.Research, error) {
 
 	supabase := db.GetSupabase()
 
 	var research models.Research
 
 	// Inserção no banco de dados
-	_, err := supabase.From("research").Insert(map[string]interface{}{
+	_, err := supabase.From("researches").Insert(map[string]interface{}{
 		"title":          createResearchData.Title,
 		"description":    createResearchData.Description,
 		"release_date":   createResearchData.ReleaseDate,
@@ -37,7 +37,7 @@ func GetAllResearches() ([]models.Research, error) {
 
 	var researches []models.Research
 
-	_, err := supabase.From("research").
+	_, err := supabase.From("researches").
 		Select("*", "", false).
 		ExecuteTo(&researches)
 
@@ -54,7 +54,7 @@ func GetResearchById(id string) (models.Research, error) {
 
 	var research models.Research
 
-	_, err := supabase.From("research").
+	_, err := supabase.From("researches").
 		Select("*", "", false).
 		Single().
 		Eq("id", id).
@@ -85,7 +85,7 @@ func UpdateResearchById(id string, updateResearchData models.UpdateResearch) (mo
 
 	var research models.Research
 
-	_, err := supabase.From("research").
+	_, err := supabase.From("researches").
 		Update(updatedData, "", ""). // Atualiza os dados no Supabase
 		Eq("id", id).                // Filtra pelo ID
 		Single().
@@ -104,8 +104,8 @@ func DeleteResearchById(id string) ([]models.Research, error) {
 
 	var deletedResearch []models.Research
 
-	_, err := supabase.From("research").
-		Delete("","").
+	_, err := supabase.From("researches").
+		Delete("", "").
 		Eq("id", id).
 		ExecuteTo(&deletedResearch)
 
