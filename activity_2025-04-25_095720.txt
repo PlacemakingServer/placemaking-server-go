@@ -1,0 +1,525 @@
+================  ROLL-UP SEMANAL POR CONTRIBUIDOR  ==================
+(ISO-week, commits, +linhas, -linhas)
+
+
+================  HISTÓRICO DETALHADO  (cronológico) =================
+
+---
+COMMIT 542244f
+AUTHOR PlacemakingServer
+DATE   2025-04-02
+MSG    Initial commit
+    
+25	0	.gitignore
+40	0	placemaking-backend-go/config/database.go
+18	0	placemaking-backend-go/controllers/input_types_controller.go
+46	0	placemaking-backend-go/go.mod
+107	0	placemaking-backend-go/go.sum
+34	0	placemaking-backend-go/main.go
+7	0	placemaking-backend-go/models/InputType.go
+29	0	placemaking-backend-go/repositories/input_type_repository.go
+10	0	placemaking-backend-go/services/input_type_service.go
+16	0	vercel.json
+---
+COMMIT 4883f82
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    vercel json
+    
+0	0	vercel.json => placemaking-backend-go/vercel.json
+---
+COMMIT 412c166
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    Appling vercel
+    
+0	0	{placemaking-backend-go/config => config}/database.go
+0	0	{placemaking-backend-go/controllers => controllers}/input_types_controller.go
+0	0	placemaking-backend-go/go.mod => go.mod
+0	0	placemaking-backend-go/go.sum => go.sum
+0	0	placemaking-backend-go/main.go => main.go
+0	0	{placemaking-backend-go/models => models}/InputType.go
+0	0	{placemaking-backend-go/repositories => repositories}/input_type_repository.go
+0	0	{placemaking-backend-go/services => services}/input_type_service.go
+2	2	placemaking-backend-go/vercel.json => vercel.json
+---
+COMMIT 5895931
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    Apply handler
+    
+7	8	go.mod
+23	12	go.sum
+26	8	main.go
+---
+COMMIT afde23f
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    Package Handler
+    
+1	1	main.go
+---
+COMMIT ee7e2d7
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    vercel update
+    
+7	28	main.go
+---
+COMMIT 12f7e99
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    fix - update
+    
+1	1	main.go
+---
+COMMIT 3cc3e5c
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    fix - vercel
+    
+2	2	vercel.json
+---
+COMMIT 21dcfb0
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    fix
+    
+2	2	vercel.json
+---
+COMMIT 983b1a2
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    deploy fix
+    
+18	16	main.go
+---
+COMMIT 7272888
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    fix
+    
+14	15	vercel.json
+---
+COMMIT db268df
+AUTHOR Yuri Henrique
+DATE   2025-04-02
+MSG    fix
+    
+16	18	main.go
+---
+COMMIT c9f841e
+AUTHOR Yuri Henrique
+DATE   2025-04-03
+MSG    Update server local & activity_types route
+    
+5	0	README.MD
+17	0	controllers/activity_types_controller.go
+2	15	main.go
+6	0	models/ActivityType.go
+30	0	repositories/Activity_types_repository.go
+1	1	repositories/input_type_repository.go
+18	0	routes/router.go
+20	0	server/server.go
+10	0	services/activity_types.go
+---
+COMMIT 7008e30
+AUTHOR Yuri Henrique
+DATE   2025-04-03
+MSG    Get-User-By-Id
+    
+1	1	controllers/input_types_controller.go
+22	0	controllers/user_controller.go
+31	0	models/User.go
+29	0	repositories/user_repository.go
+6	0	routes/router.go
+0	0	services/{activity_types.go => activity_types_service.go}
+1	1	services/input_type_service.go
+14	0	services/user_service.go
+13	0	utils/utils.go
+---
+COMMIT b226901
+AUTHOR Yuri Henrique
+DATE   2025-04-04
+MSG    Update Route and Middleware
+    
+36	0	config/settings.go
+0	17	controllers/activity_types_controller.go
+78	0	controllers/auth_controller.go
+43	1	controllers/user_controller.go
+2	2	{config => db}/database.go
+2	0	go.mod
+4	0	go.sum
+2	2	main.go
+49	0	middleware/jwt.go
+0	6	models/ActivityType.go
+55	0	models/Token.go
+45	0	models/User.go
+0	30	repositories/Activity_types_repository.go
+2	2	repositories/input_type_repository.go
+117	0	repositories/token_repository.go
+106	2	repositories/user_repository.go
+15	4	routes/router.go
+4	4	server/server.go
+0	10	services/activity_types_service.go
+130	0	services/auth_service.go
+58	0	services/email_service.go
+124	0	services/token_service.go
+83	7	services/user_service.go
+---
+COMMIT 53ff548
+AUTHOR Yuri Henrique
+DATE   2025-04-04
+MSG    middleware e token funcionando
+    
+20	5	middleware/jwt.go
+4	29	models/Token.go
+16	13	repositories/token_repository.go
+30	3	services/token_service.go
+---
+COMMIT 73eac3b
+AUTHOR Yuri Henrique
+DATE   2025-04-04
+MSG    Regovando token expirados
+    
+33	6	middleware/jwt.go
+---
+COMMIT 2488842
+AUTHOR Yuri Henrique
+DATE   2025-04-04
+MSG    Email Service Working
+    
+57	0	assets/templates/recovery-password.html
+61	0	assets/templates/welcome.html
+6	0	models/Email.go
+9	9	models/User.go
+1	2	repositories/user_repository.go
+20	13	services/auth_service.go
+---
+COMMIT 9277c6a
+AUTHOR Yuri Henrique
+DATE   2025-04-04
+MSG    Auth finalized
+    
+2	2	assets/templates/recovery-password.html
+6	21	assets/templates/welcome.html
+118	2	controllers/auth_controller.go
+1	1	controllers/user_controller.go
+4	5	middleware/jwt.go
+14	0	models/Auth.go
+7	2	models/Email.go
+16	0	repositories/user_repository.go
+4	2	routes/router.go
+145	1	services/auth_service.go
+0	1	services/email_service.go
+10	19	services/token_service.go
+---
+COMMIT 74e272c
+AUTHOR Yuri Henrique
+DATE   2025-04-04
+MSG    Middleware update
+    
+1	1	controllers/user_controller.go
+13	26	middleware/jwt.go
+6	5	repositories/user_repository.go
+19	10	routes/router.go
+3	4	services/user_service.go
+---
+COMMIT b6124ce
+AUTHOR Yuri Henrique
+DATE   2025-04-04
+MSG    Research route finalized
+    
+83	0	controllers/research_controller.go
+35	0	models/Research.go
+116	0	repositories/research_repository.go
+7	0	routes/router.go
+59	0	services/research_service.go
+---
+COMMIT 56e4b00
+AUTHOR Yuri Henrique
+DATE   2025-04-05
+MSG    Contributor route
+    
+115	0	controllers/contributors_controller.go
+16	10	controllers/research_controller.go
+17	0	models/Contributors.go
+188	0	repositories/contributors_repository.go
+2	2	repositories/research_repository.go
+47	24	routes/router.go
+3	3	services/auth_service.go
+70	0	services/contributors_service.go
+---
+COMMIT 74a93f0
+AUTHOR Eduardo Marcelino
+DATE   2025-04-05
+MSG    endpoints to comunicate with backend
+    
+3	3	go.mod
+0	3	routes/router.go
+---
+COMMIT 680a12d
+AUTHOR Yuri Henrique
+DATE   2025-04-05
+MSG    Survey routes
+    
+152	0	controllers/survey_controller.go
+18	0	models/Fields.go
+28	0	models/Survey.go
+136	0	repositories/survey_repository.go
+17	0	routes/router.go
+57	0	services/survey_service.go
+---
+COMMIT 1c388e6
+AUTHOR Yuri Henrique
+DATE   2025-04-06
+MSG    Fields routes inicialized
+    
+79	0	controllers/fields_controller.go
+2	4	models/Fields.go
+99	0	repositories/fields_repository.go
+12	4	routes/router.go
+26	0	services/fields_service.go
+---
+COMMIT ce11296
+AUTHOR Yuri Henrique
+DATE   2025-04-07
+MSG    Survey routes fixed
+    
+38	30	controllers/survey_controller.go
+6	0	models/Survey.go
+62	9	repositories/survey_repository.go
+5	5	services/survey_service.go
+---
+COMMIT 6ece077
+AUTHOR Yuri Henrique
+DATE   2025-04-07
+MSG    Fields routes fixed
+    
+30	12	controllers/fields_controller.go
+1	0	models/Fields.go
+14	4	repositories/fields_repository.go
+1	1	services/fields_service.go
+---
+COMMIT eb63daf
+AUTHOR Yuri Henrique
+DATE   2025-04-07
+MSG    Field options route
+    
+66	0	controllers/field_option_controller.go
+15	0	models/Field_option.go
+75	0	repositories/field_option_repository.go
+7	0	routes/router.go
+21	0	services/field_option_service.go
+---
+COMMIT 334d187
+AUTHOR Yuri Henrique
+DATE   2025-04-07
+MSG    Survey_contributors finalized
+    
+68	0	controllers/survey_contributors_controller.go
+17	0	models/SurveyContributors.go
+75	0	repositories/survey_contributors_repository.go
+7	0	routes/router.go
+18	0	services/survey_contributors_service.go
+---
+COMMIT da70a26
+AUTHOR Yuri Henrique
+DATE   2025-04-07
+MSG    Routes survey group e Logs finalized
+    
+17	0	models/Logs.go
+12	0	models/SurveyGroup.go
+---
+COMMIT 1b32769
+AUTHOR Eduardo Marcelino
+DATE   2025-04-08
+MSG    endpoints to comunicate with backend
+    
+3	3	repositories/input_type_repository.go
+2	2	services/survey_service.go
+---
+COMMIT 654c377
+AUTHOR Yuri Henrique
+DATE   2025-04-08
+MSG    Research Delete fix
+    
+16	7	controllers/research_controller.go
+8	6	repositories/research_repository.go
+4	4	services/research_service.go
+---
+COMMIT 8c21e4f
+AUTHOR Yuri Henrique
+DATE   2025-04-08
+MSG    contributors fixed
+    
+9	1	models/Contributors.go
+21	2	services/contributors_service.go
+---
+COMMIT 24bd1e1
+AUTHOR Yuri Henrique
+DATE   2025-04-09
+MSG    endpoints to communicate to frontend
+    
+2	1	controllers/contributors_controller.go
+6	11	controllers/survey_controller.go
+5	6	models/Contributors.go
+2	2	repositories/contributors_repository.go
+3	3	routes/router.go
+2	2	services/contributors_service.go
+---
+COMMIT 89e4382
+AUTHOR Eduardo Marcelino
+DATE   2025-04-10
+MSG    updates
+    
+0	4	main.go
+---
+COMMIT 9a34e2e
+AUTHOR Yuri Henrique
+DATE   2025-04-14
+MSG    fix - send emails
+    
+8	5	services/auth_service.go
+---
+COMMIT d7fa504
+AUTHOR Yuri Henrique
+DATE   2025-04-14
+MSG    fix - send emails
+    
+3	0	main.go
+3	5	services/auth_service.go
+0	0	{assets => templates/assets}/templates/recovery-password.html
+0	0	{assets => templates/assets}/templates/welcome.html
+6	0	templates/templates.go
+---
+COMMIT 70a5434
+AUTHOR Yuri Henrique
+DATE   2025-04-14
+MSG    fix - routes
+    
+2	2	routes/router.go
+---
+COMMIT 56d39a3
+AUTHOR Yuri Henrique
+DATE   2025-04-16
+MSG    survey group and survey answer finalized
+    
+76	0	controllers/survey_answer_controller.go
+13	27	controllers/survey_controller.go
+83	0	controllers/survey_group_controller.go
+0	2	models/Survey.go
+15	0	models/SurveyAnswer.go
+0	1	models/SurveyGroup.go
+73	0	repositories/survey_answer_repository.go
+75	0	repositories/survey_group_repository.go
+3	3	repositories/survey_repository.go
+13	0	routes/router.go
+53	0	services/survey_answer_service.go
+43	0	services/survey_group_service.go
+2	2	services/survey_service.go
+---
+COMMIT 562962d
+AUTHOR Yuri Henrique
+DATE   2025-04-17
+MSG    Fields - Fix
+    
+10	15	controllers/fields_controller.go
+0	1	models/Fields.go
+2	2	repositories/fields_repository.go
+1	1	services/fields_service.go
+---
+COMMIT 3c2eb5d
+AUTHOR Eduardo Marcelino
+DATE   2025-04-17
+MSG    lógica update
+    
+5	8	controllers/survey_controller.go
+83	0	dump_go_structure.sh
+4297	0	go_structure_dump_2025-04-16_15-22-53.txt
+---
+COMMIT 84f0870
+AUTHOR Yuri Henrique
+DATE   2025-04-18
+MSG    Demanda do Back comprida - SurveyGroup, Time, Region e Answers
+    
+85	35	controllers/survey_answer_controller.go
+125	0	controllers/survey_region_controlller.go
+130	0	controllers/survey_time_ranges_controller.go
+0	1	db/database.go
+23	9	models/SurveyAnswer.go
+25	0	models/SurveyRegion.go
+19	0	models/SurveyTimeRange.go
+103	31	repositories/survey_answer_repository.go
+144	0	repositories/survey_region_repository.go
+135	0	repositories/survey_time_ranges_repository.go
+33	11	routes/router.go
+53	43	services/survey_answer_service.go
+67	0	services/survey_region_service.go
+61	0	services/survey_time_ranges_service.go
+---
+COMMIT d14c296
+AUTHOR Yuri Henrique
+DATE   2025-04-23
+MSG    Research Update - Created_by
+    
+12	1	models/Research.go
+49	9	services/research_service.go
+---
+COMMIT 2bd7c36
+AUTHOR Eduardo Marcelino
+DATE   2025-04-24
+MSG    lógica update
+    
+2	6	controllers/research_controller.go
+0	4	controllers/survey_controller.go
+---
+COMMIT 4af0828
+AUTHOR Yuri Henrique
+DATE   2025-04-24
+MSG    add survey_type for frontend develop
+    
+2	1	models/Survey.go
+---
+COMMIT 13bcbf7
+AUTHOR Yuri Henrique
+DATE   2025-04-24
+MSG    função de buscar todos tipos de pesquisa pelo research_id
+    
+24	3	repositories/survey_repository.go
+---
+COMMIT 09d5375
+AUTHOR Yuri Henrique
+DATE   2025-04-24
+MSG    fix - add view contributor
+    
+10	0	models/SurveyContributors.go
+31	2	services/survey_contributors_service.go
+---
+COMMIT db3f7bc
+AUTHOR Eduardo Marcelino
+DATE   2025-04-24
+MSG    lógica update
+    
+64	0	controllers/sync_controller.go
+5783	0	go_structure_dump_2025-04-24_09-41-26.txt
+7	0	routes/router.go
+79	0	services/sync_service.go
+---
+COMMIT 68f52c1
+AUTHOR Eduardo Marcelino
+DATE   2025-04-24
+MSG    lógica update
+    
+57	0	controllers/sync_controller.go
+20	15	services/sync_service.go
+---
+COMMIT 6640ff8
+AUTHOR Eduardo Marcelino
+DATE   2025-04-24
+MSG    lógica sync
+    
+4	1	controllers/sync_controller.go
+6079	0	go_structure_dump_2025-04-24_20-41-25.txt
+7	7	repositories/research_repository.go
+55	24	services/sync_service.go

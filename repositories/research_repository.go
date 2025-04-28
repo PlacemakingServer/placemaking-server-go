@@ -39,6 +39,7 @@ func GetAllResearches() ([]models.Research, error) {
 
 	_, err := supabase.From("researches").
 		Select("*", "", false).
+		Eq("status", "true"). // <-- filtrando por status = true
 		ExecuteTo(&researches)
 
 	if err != nil {

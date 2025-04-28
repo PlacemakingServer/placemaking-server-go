@@ -42,32 +42,32 @@ func DeleteContributorById(id string) error {
 	return nil
 }
 
-func GetAllContributorsByResearchId(researchId string) ([]models.ViewContributor, error) {
+func GetAllContributorsByResearchId(researchId string) ([]models.Contributor, error) {
 	contributors, err := repository.GetAllContributorsByResearchId(researchId)
 	if err != nil {
 		log.Println("[Service] Erro ao buscar colaboradores por ID da pesquisa:", err)
 		return nil, err
 	}
 
-	var viewContributors []models.ViewContributor
-    for _, contributor := range contributors {
-        user, err := repository.GetUserById(contributor.UserId) // Supondo que essa função exista
-        if err != nil {
-            log.Println("[Service] Erro ao buscar usuário do colaborador:", err)
-            return nil, err
-        }
+	// var viewContributors []models.ViewContributor
+	// for _, contributor := range contributors {
+	//     user, err := repository.GetUserById(contributor.UserId) // Supondo que essa função exista
+	//     if err != nil {
+	//         log.Println("[Service] Erro ao buscar usuário do colaborador:", err)
+	//         return nil, err
+	//     }
 
-        viewContributor := models.ViewContributor{
-            ID:          contributor.ID,
-            ResearchId:  contributor.ResearchId,
-            UserId:      contributor.UserId,
-            Instruction: contributor.Instruction,
-            User:        models.SanitizeUser(user), // Atribui o usuário à estrutura
-        }
-        viewContributors = append(viewContributors, viewContributor)
-    }
+	//     viewContributor := models.ViewContributor{
+	//         ID:          contributor.ID,
+	//         ResearchId:  contributor.ResearchId,
+	//         UserId:      contributor.UserId,
+	//         Instruction: contributor.Instruction,
+	//         User:        models.SanitizeUser(user), // Atribui o usuário à estrutura
+	//     }
+	//     viewContributors = append(viewContributors, viewContributor)
+	// }
 
-	return viewContributors, nil
+	return contributors, nil
 }
 
 func GetContributorByResearchAndUserId(researchId, userId string) (models.Contributor, error) {

@@ -1,6 +1,6 @@
 🔎 Dump de Estrutura – Projeto Go
 Raiz do projeto : /Users/eduardomarcelino/Desktop/Placemaking project/placemaking-server-go
-Gerado em       : Thu Apr 24 09:41:26 -03 2025
+Gerado em       : Fri Apr 25 09:57:49 -03 2025
 ------------------------------------------------------------
 
 📄 Arquivo : .env
@@ -1462,6 +1462,141 @@ func DeleteSurveyTimeRange(c *gin.Context) {
 ============================================================
 
 
+📄 Arquivo : sync_controller.go
+📂 Pasta   : controllers
+🧭 Caminho : controllers/sync_controller.go
+--------------------------------------
+📜 Conteúdo:
+
+package controllers
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"placemaking-backend-go/services"
+
+	"github.com/gin-gonic/gin"
+)
+
+func SyncGet(c *gin.Context) {
+	entity := c.Param("entity")
+	if entity == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Entidade não especificada"})
+		return
+	}
+
+	fromDate := time.Now().AddDate(0, 0, -20)
+
+	var data interface{}
+	var err error
+
+	switch entity {
+	case "users":
+		data, err = services.GetUsersSince()
+	case "researches":
+		data, err = services.GetResearchesSince(fromDate)
+	case "research_contributors":
+		data, err = services.GetResearchContributorsSince(fromDate)
+	case "fields":
+		data, err = services.GetFieldsSince(fromDate)
+	case "input_types":
+		data, err = services.GetInputTypesSince(fromDate)
+	case "field_options":
+		data, err = services.GetFieldOptionsSince(fromDate)
+	case "survey_answers":
+		data, err = services.GetSurveyAnswersSince(fromDate)
+	case "static_surveys":
+		data, err = services.GetStaticSurveysSince(fromDate)
+	case "form_surveys":
+		data, err = services.GetFormSurveysSince(fromDate)
+	case "dynamic_surveys":
+		data, err = services.GetDynamicSurveysSince(fromDate)
+	case "survey_time_ranges":
+		data, err = services.GetSurveyTimeRangesSince(fromDate)
+	case "survey_regions":
+		data, err = services.GetSurveyRegionsSince(fromDate)
+	case "survey_group":
+		data, err = services.GetSurveyGroupsSince(fromDate)
+	case "survey_contributors":
+		data, err = services.GetSurveyContributorsSince(fromDate)
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Entidade não reconhecida"})
+		return
+	}
+
+	if err != nil {
+		fmt.Printf("[SyncGet][%s] erro: %v\n", entity, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{entity: data})
+}
+
+func SyncPatch(c *gin.Context) {
+	entity := c.Param("entity")
+	if entity == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Entidade não especificada"})
+		return
+	}
+
+	var items []map[string]interface{}
+	if err := c.BindJSON(&items); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido"})
+		return
+	}
+
+	var err error
+
+	switch entity {
+	case "users":
+		err = services.UpsertGeneric("users", items)
+	case "researches":
+		err = services.UpsertGeneric("researches", items)
+	case "research_contributors":
+		err = services.UpsertGeneric("research_contributors", items)
+	case "fields":
+		err = services.UpsertGeneric("fields", items)
+	case "input_types":
+		err = services.UpsertGeneric("input_types", items)
+	case "field_options":
+		err = services.UpsertGeneric("field_options", items)
+	case "survey_answers":
+		err = services.UpsertGeneric("survey_answers", items)
+	case "static_surveys":
+		err = services.UpsertGeneric("static_surveys", items)
+	case "form_surveys":
+		err = services.UpsertGeneric("form_surveys", items)
+	case "dynamic_surveys":
+		err = services.UpsertGeneric("dynamic_surveys", items)
+	case "survey_time_ranges":
+		err = services.UpsertGeneric("survey_time_ranges", items)
+	case "survey_regions":
+		err = services.UpsertGeneric("survey_regions", items)
+	case "survey_group":
+		err = services.UpsertGeneric("survey_group", items)
+	case "survey_contributors":
+		err = services.UpsertGeneric("survey_contributors", items)
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Entidade não reconhecida"})
+		return
+	}
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
+
+============================================================
+
+
 📄 Arquivo : user_controller.go
 📂 Pasta   : controllers
 🧭 Caminho : controllers/user_controller.go
@@ -1674,6 +1809,86 @@ while IFS= read -r -d '' file; do
 done
 
 echo "✅ Estrutura exportada em: $OUTPUT_FILE"
+
+
+============================================================
+
+
+📄 Arquivo : export_code_with_commits.sh
+📂 Pasta   : .
+🧭 Caminho : export_code_with_commits.sh
+--------------------------------------
+📜 Conteúdo:
+
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────────────────────────────────────
+# export_git_activity.sh
+# Gera um TXT com:
+#   1) ROLL-UP semanal   – commits + linhas adicionadas/removidas por autor/semana
+#   2) COMMITS detalhados – ordem cronológica, com numstat (arquivo +adds +dels)
+#      Isso atende análise de esforço/hora por contribuidor.
+# ──────────────────────────────────────────────────────────────────────────────
+set -euo pipefail
+
+################################################################################
+# Ajustes rápidos
+################################################################################
+OUT="activity_$(date +%Y-%m-%d_%H%M%S).txt"
+IGNORE_MERGES="--no-merges"      # troque para "" se quiser incluir merges
+DATE_FMT="short"                 # short | iso | rfc | relative …
+################################################################################
+
+[ -d .git ] || { echo "❌ Não há repositório Git aqui."; exit 1; }
+command -v git >/dev/null || { echo "❌ Git não encontrado."; exit 1; }
+
+echo "📝 Gerando $OUT …"
+{
+###############################################################################
+# 1) ROLL-UP SEMANAL ///////////////////////////////////////////////////////////
+###############################################################################
+echo "================  ROLL-UP SEMANAL POR CONTRIBUIDOR  =================="
+echo "(ISO-week, commits, +linhas, -linhas)"
+echo
+
+# Coleta: data ISO-week, autor, +adds, -dels
+git log $IGNORE_MERGES --date=iso --pretty='%ad|%an' --numstat |
+awk -F'|' '
+  BEGIN { OFS="|" }
+  /^[0-9]{4}-/ {
+      split($1,dt," ");         # dt[1] = YYYY-MM-DD
+      cmd = "date -d " dt[1] " +%G-W%V"; cmd | getline wk; close(cmd);
+      week = wk; author = $2;
+      nextline = getline;        # lê primeira linha de numstat ou blank
+      while(nextline && $0 != "") {
+          if(NF==3) { plus=$1; minus=$2 }
+          else      { plus=0; minus=0 }
+          key = week FS author;
+          commits[key]++; adds[key]+=plus; dels[key]+=minus;
+          nextline = getline;
+      }
+  }
+  END {
+      PROCINFO["sorted_in"]="@ind_str_asc";
+      for(k in commits){
+          split(k,a,FS); printf "%s | %-20s | %4d | %+7d | -%7d\n",
+                 a[1], a[2], commits[k], adds[k], dels[k]
+      }
+  }'
+
+echo
+###############################################################################
+# 2) HISTÓRICO COMPLETO ////////////////////////////////////////////////////////
+###############################################################################
+echo "================  HISTÓRICO DETALHADO  (cronológico) ================="
+echo
+
+git log $IGNORE_MERGES --reverse --date=$DATE_FMT \
+  --pretty=$'---\nCOMMIT %h\nAUTHOR %an\nDATE   %ad\nMSG    %s' --numstat |
+sed 's/^$/    /'          # deixa linha em branco antes de cada bloco numstat
+
+} > "$OUT"
+
+echo "✅ Pronto! Arquivo gerado em: $OUT"
 
 
 ============================================================
@@ -2238,6 +2453,7 @@ type Survey struct {
 	Long          float32 `json:"long"`
 	LocationTitle string  `json:"location_title"`
 	ResearchId    string  `json:"research_id"`
+	SurveyType    string  `json:"survey_type"`
 }
 
 type CreateSurvey struct {
@@ -2260,6 +2476,7 @@ type UpdateSurvey struct {
 type SurveyType struct {
 	Type string `json:"survey_type"`
 }
+
 
 ============================================================
 
@@ -2320,6 +2537,16 @@ type SurveyContributors struct {
 	Instruction string `json:"instruction"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
+}
+
+type ViewSurveyContributors struct {
+	ID          string        `json:"id"`
+	SurveyId    string        `json:"survey_id"`
+	SurveyType  string        `json:"survey_type"`
+	User        SanitizedUser `json:"user"`
+	Instruction string        `json:"instruction"`
+	CreatedAt   string        `json:"created_at"`
+	UpdatedAt   string        `json:"updated_at"`
 }
 
 type CreateSurveyContributors struct {
@@ -3006,14 +3233,14 @@ import (
 	"time"
 )
 
-func CreateResearch(createResearchData models.CreateResearch) (models.Research, error){
+func CreateResearch(createResearchData models.CreateResearch) (models.Research, error) {
 
 	supabase := db.GetSupabase()
 
 	var research models.Research
 
 	// Inserção no banco de dados
-	_, err := supabase.From("research").Insert(map[string]interface{}{
+	_, err := supabase.From("researches").Insert(map[string]interface{}{
 		"title":          createResearchData.Title,
 		"description":    createResearchData.Description,
 		"release_date":   createResearchData.ReleaseDate,
@@ -3036,7 +3263,7 @@ func GetAllResearches() ([]models.Research, error) {
 
 	var researches []models.Research
 
-	_, err := supabase.From("research").
+	_, err := supabase.From("researches").
 		Select("*", "", false).
 		ExecuteTo(&researches)
 
@@ -3053,7 +3280,7 @@ func GetResearchById(id string) (models.Research, error) {
 
 	var research models.Research
 
-	_, err := supabase.From("research").
+	_, err := supabase.From("researches").
 		Select("*", "", false).
 		Single().
 		Eq("id", id).
@@ -3084,7 +3311,7 @@ func UpdateResearchById(id string, updateResearchData models.UpdateResearch) (mo
 
 	var research models.Research
 
-	_, err := supabase.From("research").
+	_, err := supabase.From("researches").
 		Update(updatedData, "", ""). // Atualiza os dados no Supabase
 		Eq("id", id).                // Filtra pelo ID
 		Single().
@@ -3103,8 +3330,8 @@ func DeleteResearchById(id string) ([]models.Research, error) {
 
 	var deletedResearch []models.Research
 
-	_, err := supabase.From("research").
-		Delete("","").
+	_, err := supabase.From("researches").
+		Delete("", "").
 		Eq("id", id).
 		ExecuteTo(&deletedResearch)
 
@@ -3775,15 +4002,35 @@ func DeleteSurveyById(id, surveyType string) (models.Survey, error) {
 // Buscar pesquisas por research_id
 func GetSurveysByResearchId(researchId, surveyType string) ([]models.Survey, error) {
 	supabase := db.GetSupabase()
+	var surveys []models.Survey
+
+	if surveyType == "all" {
+		tables := []string{"form_surveys", "static_surveys", "dynamic_surveys"}
+
+		for _, tableName := range tables {
+			var partial []models.Survey
+			_, err := supabase.From(tableName).
+				Select("*", "", false).
+				Eq("research_id", researchId).
+				ExecuteTo(&partial)
+
+			if err != nil {
+				log.Printf("[GetSurveysByResearchId] Erro ao buscar da tabela %s: %v", tableName, err)
+				return nil, err
+			}
+
+			surveys = append(surveys, partial...)
+		}
+
+		return surveys, nil
+	}
 
 	tableName, exists := surveyTypeMap[surveyType]
 	if !exists {
 		err := fmt.Errorf("tipo de survey inválido: %s", surveyType)
-		log.Println("[CreateSurvey] Erro:", err)
+		log.Println("[GetSurveysByResearchId] Erro:", err)
 		return []models.Survey{}, err
 	}
-
-	var surveys []models.Survey
 
 	_, err := supabase.From(tableName).
 		Select("*", "", false).
@@ -3791,6 +4038,7 @@ func GetSurveysByResearchId(researchId, surveyType string) ([]models.Survey, err
 		ExecuteTo(&surveys)
 
 	if err != nil {
+		log.Printf("[GetSurveysByResearchId] Erro na busca única: %v", err)
 		return nil, err
 	}
 
@@ -4384,6 +4632,13 @@ func SetupRouter() *gin.Engine {
 			field_option.GET("", controllers.GetAllFieldOptionsByFieldId)
 			field_option.POST("", controllers.CreateFieldOption)
 			field_option.DELETE("/:optionId", controllers.DeleteFieldOptionById)
+		}
+
+		// Grupo de sincronização
+		sync := api.Group("/sync")
+		{
+			sync.GET("/:entity", controllers.SyncGet)
+			sync.PATCH("/:entity", controllers.SyncPatch)
 		}
 
 		// Grupo de tipos de input
@@ -5172,15 +5427,44 @@ package services
 import (
 	"placemaking-backend-go/models"
 	"placemaking-backend-go/repositories"
+	"log"
 )
 
 func CreateSurveyContributorService(id string, data models.CreateSurveyContributors) (models.SurveyContributors, error) {
 	return repository.CreateSurveyContributors(id, data)
 }
 
-func GetSurveyContributorsBySurveyIdService(surveyId string) ([]models.SurveyContributors, error) {
-	return repository.GetSurveyContributorsBySurveyId(surveyId)
+func GetSurveyContributorsBySurveyIdService(surveyId string) ([]models.ViewSurveyContributors, error) {
+	contributors, err := repository.GetSurveyContributorsBySurveyId(surveyId)
+	if err != nil {
+		log.Println("[Service] Erro ao buscar survey contributors:", err)
+		return nil, err
+	}
+
+	var viewContributors []models.ViewSurveyContributors
+	for _, contributor := range contributors {
+		user, err := repository.GetUserById(contributor.UserId)
+		if err != nil {
+			log.Println("[Service] Erro ao buscar usuário do survey contributor:", err)
+			return nil, err
+		}
+
+		viewContributor := models.ViewSurveyContributors{
+			ID:          contributor.ID,
+			SurveyId:    contributor.SurveyId,
+			SurveyType:  contributor.SurveyType,
+			User:        models.SanitizeUser(user),
+			Instruction: contributor.Instruction,
+			CreatedAt:   contributor.CreatedAt,
+			UpdatedAt:   contributor.UpdatedAt,
+		}
+
+		viewContributors = append(viewContributors, viewContributor)
+	}
+
+	return viewContributors, nil
 }
+
 
 func DeleteSurveyContributorsByIdService(id, surveyId string) error {
 	return repository.DeleteSurveyContributorsById(id, surveyId)
@@ -5456,6 +5740,132 @@ func DeleteSurveyTimeRange(id string) ([]models.SurveyTimeRange, error) {
 		return nil, err
 	}
 	return deleted, nil
+}
+
+
+============================================================
+
+
+📄 Arquivo : sync_service.go
+📂 Pasta   : services
+🧭 Caminho : services/sync_service.go
+--------------------------------------
+📜 Conteúdo:
+
+package services
+
+import (
+	"log"
+	"time"
+
+	"placemaking-backend-go/db"
+	"placemaking-backend-go/models"
+)
+
+// Struct público para retorno seguro de usuários
+type PublicUser struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func fetchSince[T any](table string, fromDate time.Time, filterByDate bool) ([]T, error) {
+	var results []T
+	query := db.GetSupabase().
+		From(table).
+		Select("*", "exact", false)
+
+	if filterByDate {
+		query = query.Gte("created_at", fromDate.Format(time.RFC3339))
+	}
+
+	_, err := query.ExecuteTo(&results)
+	return results, err
+}
+
+func UpsertGeneric(table string, items []map[string]interface{}) error {
+	_, _, err := db.GetSupabase().
+		From(table).
+		Upsert(items, "id", "minimal", "").
+		Execute()
+
+	return err
+}
+
+func GetUsersSince() ([]models.SanitizedUser, error) {
+	supabase := db.GetSupabase()
+
+	var users []models.User
+
+	_, err := supabase.From("users").
+		Select("*", "", false).
+		ExecuteTo(&users)
+
+	if err != nil {
+		log.Println("Erro ao buscar usuários:", err)
+		return nil, err
+	}
+
+	var sanitizedUsers []models.SanitizedUser
+	for _, user := range users {
+		user.ConvertTimestamps()
+		sanitizedUsers = append(sanitizedUsers, models.SanitizeUser(user))
+	}
+
+	return sanitizedUsers, nil
+}
+
+func GetInputTypesSince(fromDate time.Time) ([]models.InputType, error) {
+	return fetchSince[models.InputType]("input_types", fromDate, false)
+}
+
+func GetResearchesSince(fromDate time.Time) ([]models.Research, error) {
+	return fetchSince[models.Research]("researches", fromDate, true)
+}
+
+func GetResearchContributorsSince(fromDate time.Time) ([]models.Contributor, error) {
+	return fetchSince[models.Contributor]("research_contributors", fromDate, true)
+}
+
+func GetFieldsSince(fromDate time.Time) ([]models.Field, error) {
+	return fetchSince[models.Field]("fields", fromDate, true)
+}
+
+func GetFieldOptionsSince(fromDate time.Time) ([]models.FieldOption, error) {
+	return fetchSince[models.FieldOption]("field_options", fromDate, true)
+}
+
+func GetSurveyAnswersSince(fromDate time.Time) ([]models.SurveyAnswer, error) {
+	return fetchSince[models.SurveyAnswer]("survey_answers", fromDate, true)
+}
+
+func GetStaticSurveysSince(fromDate time.Time) ([]models.Survey, error) {
+	return fetchSince[models.Survey]("static_surveys", fromDate, true)
+}
+
+func GetFormSurveysSince(fromDate time.Time) ([]models.Survey, error) {
+	return fetchSince[models.Survey]("form_surveys", fromDate, true)
+}
+
+func GetDynamicSurveysSince(fromDate time.Time) ([]models.Survey, error) {
+	return fetchSince[models.Survey]("dynamic_surveys", fromDate, true)
+}
+
+func GetSurveyTimeRangesSince(fromDate time.Time) ([]models.SurveyTimeRange, error) {
+	return fetchSince[models.SurveyTimeRange]("survey_time_ranges", fromDate, true)
+}
+
+func GetSurveyRegionsSince(fromDate time.Time) ([]models.SurveyRegion, error) {
+	return fetchSince[models.SurveyRegion]("survey_regions", fromDate, true)
+}
+
+func GetSurveyGroupsSince(fromDate time.Time) ([]models.SurveyGroup, error) {
+	return fetchSince[models.SurveyGroup]("survey_group", fromDate, true)
+}
+
+func GetSurveyContributorsSince(fromDate time.Time) ([]models.SurveyContributors, error) {
+	return fetchSince[models.SurveyContributors]("survey_contributors", fromDate, true)
 }
 
 

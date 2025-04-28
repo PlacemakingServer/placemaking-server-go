@@ -17,7 +17,7 @@ func FetchCreateResearch(createResearchData models.CreateResearch) (models.Resea
 	return research, nil
 }
 
-func FetchAllResearches() ([]models.ViewResearch, error) {
+func FetchAllResearches() ([]models.Research, error) {
 
 	researches, err := repository.GetAllResearches()
 	if err != nil {
@@ -25,34 +25,34 @@ func FetchAllResearches() ([]models.ViewResearch, error) {
 		return nil, err
 	}
 
-	var viewResearches []models.ViewResearch
-	for _, research := range researches {
-		user, err := repository.GetUserById(research.CreatedBy)
-		if err != nil {
-			log.Println("[Service] Erro ao buscar usuário da pesquisa:", err)
-			return nil, err
-		}
+	// var viewResearches []models.ViewResearch
+	// for _, research := range researches {
+	// 	user, err := repository.GetUserById(research.CreatedBy)
+	// 	if err != nil {
+	// 		log.Println("[Service] Erro ao buscar usuário da pesquisa:", err)
+	// 		return nil, err
+	// 	}
 
-		viewResearch := models.ViewResearch{
-			Id:            research.Id,
-			Title:         research.Title,
-			Description:   research.Description,
-			ReleaseDate:   research.ReleaseDate,
-			CreatedBy:     models.SanitizeUser(user),
-			Lat:           research.Lat,
-			Long:          research.Long,
-			LocationTitle: research.LocationTitle,
-			EndDate:       research.EndDate,
-		}
+	// 	viewResearch := models.ViewResearch{
+	// 		Id:            research.Id,
+	// 		Title:         research.Title,
+	// 		Description:   research.Description,
+	// 		ReleaseDate:   research.ReleaseDate,
+	// 		CreatedBy:     models.SanitizeUser(user),
+	// 		Lat:           research.Lat,
+	// 		Long:          research.Long,
+	// 		LocationTitle: research.LocationTitle,
+	// 		EndDate:       research.EndDate,
+	// 	}
 
-		viewResearches = append(viewResearches, viewResearch)
-	}
+	// 	viewResearches = append(viewResearches, viewResearch)
+	// }
 
-	return viewResearches, nil
+	return researches, nil
 }
 
-func FetchResearchById(id string) (models.ViewResearch, error){
-	
+func FetchResearchById(id string) (models.ViewResearch, error) {
+
 	research, err := repository.GetResearchById(id)
 	if err != nil {
 		log.Println("[Service] Erro ao buscar pesquisa por ID:", err)
