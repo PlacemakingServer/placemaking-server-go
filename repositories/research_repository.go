@@ -82,6 +82,7 @@ func UpdateResearchById(id string, updateResearchData models.UpdateResearch) (mo
 		"long":           updateResearchData.Long,
 		"location_title": updateResearchData.LocationTitle,
 		"updated_at":     time.Now(), // Atualiza a data de modificação
+		"status":         updateResearchData.Status,
 	}
 
 	var research models.Research

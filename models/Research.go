@@ -44,4 +44,5 @@ type UpdateResearch struct {
 	Long          float32 `json:"long"`
 	LocationTitle string  `json:"location_title"`
 	EndDate       string  `json:"end_date"`
+	Status        bool    `json:"status"`
 }
