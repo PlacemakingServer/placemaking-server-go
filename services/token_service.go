@@ -77,7 +77,6 @@ func GenerateUserToken(user models.User, tokenType string) (*models.Token, error
 	return token, nil
 }
 
-
 func GenerateJWTToken(user models.User) map[string]interface{} {
 	expire := time.Now().Add(time.Minute * time.Duration(JWTExpiresMinutes))
 
