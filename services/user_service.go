@@ -51,6 +51,17 @@ func FetchUpdateUser(id string, user models.User) (models.User, error) {
 		return models.User{}, err
 	}
 
+	if updatedData["status"] == "inactive" {
+		err := repository.RevokeAllTokensByUserID(id, "Bearer")
+
+		if err != nil {
+			log.Println("[FetchUpdateUser] Erro ao revogar tokens:", err)
+			return models.User{}, err
+		} else {
+			log.Println("[FetchUpdateUser] Tokens revogados com sucesso.")
+		}
+	}
+
 	return user, nil
 }
 
