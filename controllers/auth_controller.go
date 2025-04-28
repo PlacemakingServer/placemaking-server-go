@@ -54,7 +54,8 @@ func Login(c* gin.Context) {
 	data, err := services.LoginUser(loginData.Email, loginData.Password)
 
 	if err != nil {
-		c.JSON(400, gin.H{"error": err})
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Usuário logado com sucesso!", "access_token": data["token"], "user": data["user"]})

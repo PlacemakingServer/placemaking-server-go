@@ -3,12 +3,13 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
-	"placemaking-backend-go/templates"
 	"placemaking-backend-go/models"
 	repository "placemaking-backend-go/repositories"
+	"placemaking-backend-go/templates"
 )
 
 func RegisterUser(createUserData models.CreateUser) (*models.SanitizedUser, string, error) {
@@ -58,7 +59,11 @@ func LoginUser(email string, password string) (map[string]interface{}, error) {
 
 	// Verifica a senha
 	if !CheckPassword(password, existingUser.Password) {
-		return map[string]interface{}{"error": "Senha inválida"}, err
+		return map[string]interface{}{"error": "Senha inválida"}, errors.New("senha inválida")
+	}
+
+	if existingUser.Status == "inactive" {
+		return map[string]interface{}{"error": "Usuário inativo"}, errors.New("usuário inativo")
 	}
 
 	// Gera um token JWT para o usuário autenticado
