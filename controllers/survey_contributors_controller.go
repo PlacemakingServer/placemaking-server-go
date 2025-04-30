@@ -25,7 +25,7 @@ func CreateSurveyContributor(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Contribuidor criado com sucesso.","contributor": surveyContributor})
+	c.JSON(http.StatusCreated, gin.H{"message": "Contribuidor criado com sucesso.", "contributor": surveyContributor})
 }
 
 // Obter todos os contribuidores de uma pesquisa pelo surveyId
@@ -43,7 +43,7 @@ func GetSurveyContributorsBySurveyId(c *gin.Context) {
 
 // Deletar um contribuidor de uma pesquisa pelo ID e surveyId (assíncrono)
 func DeleteSurveyContributor(c *gin.Context) {
-	id := c.Param("contributorId")
+	user_id := c.Param("contributorId")
 	surveyId := c.Param("surveyId")
 
 	// Canal para receber o resultado da goroutine
@@ -51,7 +51,7 @@ func DeleteSurveyContributor(c *gin.Context) {
 
 	// Executa a deleção em uma goroutine
 	go func() {
-		errChan <- services.DeleteSurveyContributorsByIdService(id, surveyId)
+		errChan <- services.DeleteSurveyContributorsByIdService(user_id, surveyId)
 	}()
 
 	// Aguarda a resposta da goroutine
@@ -65,4 +65,3 @@ func DeleteSurveyContributor(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Contribuidor deletado com sucesso"})
 }
-

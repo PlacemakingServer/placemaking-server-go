@@ -51,14 +51,14 @@ func GetSurveyContributorsBySurveyId(surveyId string) ([]models.SurveyContributo
 	return surveyContributors, nil
 }
 
-func DeleteSurveyContributorsById(id, surveyId string) error {
+func DeleteSurveyContributorsById(user_id, surveyId string) error {
 	supabase := db.GetSupabase()
 
 	var deletedContributor []models.SurveyContributors
 
 	_, err := supabase.From("survey_contributors").
 		Delete("", "").
-		Eq("id", id).
+		Eq("user_id", user_id).
 		Eq("survey_id", surveyId).
 		ExecuteTo(&deletedContributor)
 
