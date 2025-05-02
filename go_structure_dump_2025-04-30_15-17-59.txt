@@ -1,6 +1,6 @@
 🔎 Dump de Estrutura – Projeto Go
 Raiz do projeto : /Users/eduardomarcelino/Desktop/Placemaking project/placemaking-server-go
-Gerado em       : Fri Apr 25 09:57:49 -03 2025
+Gerado em       : Wed Apr 30 15:17:59 -03 2025
 ------------------------------------------------------------
 
 📄 Arquivo : .env
@@ -145,7 +145,8 @@ func Login(c* gin.Context) {
 	data, err := services.LoginUser(loginData.Email, loginData.Password)
 
 	if err != nil {
-		c.JSON(400, gin.H{"error": err})
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Usuário logado com sucesso!", "access_token": data["token"], "user": data["user"]})
@@ -898,7 +899,7 @@ func CreateSurveyContributor(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Contribuidor criado com sucesso.","contributor": surveyContributor})
+	c.JSON(http.StatusCreated, gin.H{"message": "Contribuidor criado com sucesso.", "contributor": surveyContributor})
 }
 
 // Obter todos os contribuidores de uma pesquisa pelo surveyId
@@ -916,7 +917,7 @@ func GetSurveyContributorsBySurveyId(c *gin.Context) {
 
 // Deletar um contribuidor de uma pesquisa pelo ID e surveyId (assíncrono)
 func DeleteSurveyContributor(c *gin.Context) {
-	id := c.Param("contributorId")
+	user_id := c.Param("contributorId")
 	surveyId := c.Param("surveyId")
 
 	// Canal para receber o resultado da goroutine
@@ -924,7 +925,7 @@ func DeleteSurveyContributor(c *gin.Context) {
 
 	// Executa a deleção em uma goroutine
 	go func() {
-		errChan <- services.DeleteSurveyContributorsByIdService(id, surveyId)
+		errChan <- services.DeleteSurveyContributorsByIdService(user_id, surveyId)
 	}()
 
 	// Aguarda a resposta da goroutine
@@ -938,7 +939,6 @@ func DeleteSurveyContributor(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Contribuidor deletado com sucesso"})
 }
-
 
 
 ============================================================
@@ -2409,6 +2409,7 @@ type Research struct {
 	Long          float32 `json:"long"`
 	LocationTitle string  `json:"location_title"`
 	EndDate       string  `json:"end_date"`
+	Status        bool    `json:"status"`
 }
 
 type ViewResearch struct {
@@ -2431,6 +2432,7 @@ type UpdateResearch struct {
 	Long          float32 `json:"long"`
 	LocationTitle string  `json:"location_title"`
 	EndDate       string  `json:"end_date"`
+	Status        bool    `json:"status"`
 }
 
 
@@ -3265,6 +3267,7 @@ func GetAllResearches() ([]models.Research, error) {
 
 	_, err := supabase.From("researches").
 		Select("*", "", false).
+		Eq("status", "true"). // <-- filtrando por status = true
 		ExecuteTo(&researches)
 
 	if err != nil {
@@ -3307,6 +3310,7 @@ func UpdateResearchById(id string, updateResearchData models.UpdateResearch) (mo
 		"long":           updateResearchData.Long,
 		"location_title": updateResearchData.LocationTitle,
 		"updated_at":     time.Now(), // Atualiza a data de modificação
+		"status":         updateResearchData.Status,
 	}
 
 	var research models.Research
@@ -3561,14 +3565,14 @@ func GetSurveyContributorsBySurveyId(surveyId string) ([]models.SurveyContributo
 	return surveyContributors, nil
 }
 
-func DeleteSurveyContributorsById(id, surveyId string) error {
+func DeleteSurveyContributorsById(user_id, surveyId string) error {
 	supabase := db.GetSupabase()
 
 	var deletedContributor []models.SurveyContributors
 
 	_, err := supabase.From("survey_contributors").
 		Delete("", "").
-		Eq("id", id).
+		Eq("user_id", user_id).
 		Eq("survey_id", surveyId).
 		ExecuteTo(&deletedContributor)
 
@@ -4635,11 +4639,11 @@ func SetupRouter() *gin.Engine {
 		}
 
 		// Grupo de sincronização
-		sync := api.Group("/sync")
-		{
-			sync.GET("/:entity", controllers.SyncGet)
-			sync.PATCH("/:entity", controllers.SyncPatch)
-		}
+		// sync := api.Group("/sync")
+		// {
+		// 	sync.GET("/:entity", controllers.SyncGet)
+		// 	sync.PATCH("/:entity", controllers.SyncPatch)
+		// }
 
 		// Grupo de tipos de input
 		api.GET("/input_types", controllers.GetInputTypes)
@@ -4694,12 +4698,13 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
-	"placemaking-backend-go/templates"
 	"placemaking-backend-go/models"
 	repository "placemaking-backend-go/repositories"
+	"placemaking-backend-go/templates"
 )
 
 func RegisterUser(createUserData models.CreateUser) (*models.SanitizedUser, string, error) {
@@ -4749,7 +4754,11 @@ func LoginUser(email string, password string) (map[string]interface{}, error) {
 
 	// Verifica a senha
 	if !CheckPassword(password, existingUser.Password) {
-		return map[string]interface{}{"error": "Senha inválida"}, err
+		return map[string]interface{}{"error": "Senha inválida"}, errors.New("senha inválida")
+	}
+
+	if existingUser.Status == "inactive" {
+		return map[string]interface{}{"error": "Usuário inativo"}, errors.New("usuário inativo")
 	}
 
 	// Gera um token JWT para o usuário autenticado
@@ -5026,32 +5035,32 @@ func DeleteContributorById(id string) error {
 	return nil
 }
 
-func GetAllContributorsByResearchId(researchId string) ([]models.ViewContributor, error) {
+func GetAllContributorsByResearchId(researchId string) ([]models.Contributor, error) {
 	contributors, err := repository.GetAllContributorsByResearchId(researchId)
 	if err != nil {
 		log.Println("[Service] Erro ao buscar colaboradores por ID da pesquisa:", err)
 		return nil, err
 	}
 
-	var viewContributors []models.ViewContributor
-    for _, contributor := range contributors {
-        user, err := repository.GetUserById(contributor.UserId) // Supondo que essa função exista
-        if err != nil {
-            log.Println("[Service] Erro ao buscar usuário do colaborador:", err)
-            return nil, err
-        }
+	// var viewContributors []models.ViewContributor
+	// for _, contributor := range contributors {
+	//     user, err := repository.GetUserById(contributor.UserId) // Supondo que essa função exista
+	//     if err != nil {
+	//         log.Println("[Service] Erro ao buscar usuário do colaborador:", err)
+	//         return nil, err
+	//     }
 
-        viewContributor := models.ViewContributor{
-            ID:          contributor.ID,
-            ResearchId:  contributor.ResearchId,
-            UserId:      contributor.UserId,
-            Instruction: contributor.Instruction,
-            User:        models.SanitizeUser(user), // Atribui o usuário à estrutura
-        }
-        viewContributors = append(viewContributors, viewContributor)
-    }
+	//     viewContributor := models.ViewContributor{
+	//         ID:          contributor.ID,
+	//         ResearchId:  contributor.ResearchId,
+	//         UserId:      contributor.UserId,
+	//         Instruction: contributor.Instruction,
+	//         User:        models.SanitizeUser(user), // Atribui o usuário à estrutura
+	//     }
+	//     viewContributors = append(viewContributors, viewContributor)
+	// }
 
-	return viewContributors, nil
+	return contributors, nil
 }
 
 func GetContributorByResearchAndUserId(researchId, userId string) (models.Contributor, error) {
@@ -5258,7 +5267,7 @@ func FetchCreateResearch(createResearchData models.CreateResearch) (models.Resea
 	return research, nil
 }
 
-func FetchAllResearches() ([]models.ViewResearch, error) {
+func FetchAllResearches() ([]models.Research, error) {
 
 	researches, err := repository.GetAllResearches()
 	if err != nil {
@@ -5266,34 +5275,34 @@ func FetchAllResearches() ([]models.ViewResearch, error) {
 		return nil, err
 	}
 
-	var viewResearches []models.ViewResearch
-	for _, research := range researches {
-		user, err := repository.GetUserById(research.CreatedBy)
-		if err != nil {
-			log.Println("[Service] Erro ao buscar usuário da pesquisa:", err)
-			return nil, err
-		}
+	// var viewResearches []models.ViewResearch
+	// for _, research := range researches {
+	// 	user, err := repository.GetUserById(research.CreatedBy)
+	// 	if err != nil {
+	// 		log.Println("[Service] Erro ao buscar usuário da pesquisa:", err)
+	// 		return nil, err
+	// 	}
 
-		viewResearch := models.ViewResearch{
-			Id:            research.Id,
-			Title:         research.Title,
-			Description:   research.Description,
-			ReleaseDate:   research.ReleaseDate,
-			CreatedBy:     models.SanitizeUser(user),
-			Lat:           research.Lat,
-			Long:          research.Long,
-			LocationTitle: research.LocationTitle,
-			EndDate:       research.EndDate,
-		}
+	// 	viewResearch := models.ViewResearch{
+	// 		Id:            research.Id,
+	// 		Title:         research.Title,
+	// 		Description:   research.Description,
+	// 		ReleaseDate:   research.ReleaseDate,
+	// 		CreatedBy:     models.SanitizeUser(user),
+	// 		Lat:           research.Lat,
+	// 		Long:          research.Long,
+	// 		LocationTitle: research.LocationTitle,
+	// 		EndDate:       research.EndDate,
+	// 	}
 
-		viewResearches = append(viewResearches, viewResearch)
-	}
+	// 	viewResearches = append(viewResearches, viewResearch)
+	// }
 
-	return viewResearches, nil
+	return researches, nil
 }
 
-func FetchResearchById(id string) (models.ViewResearch, error){
-	
+func FetchResearchById(id string) (models.ViewResearch, error) {
+
 	research, err := repository.GetResearchById(id)
 	if err != nil {
 		log.Println("[Service] Erro ao buscar pesquisa por ID:", err)
@@ -5425,49 +5434,48 @@ func DeleteSurveyAnswerById(id string) ([]models.SurveyAnswer, error) {
 package services
 
 import (
-	"placemaking-backend-go/models"
-	"placemaking-backend-go/repositories"
 	"log"
+	"placemaking-backend-go/models"
+	repository "placemaking-backend-go/repositories"
 )
 
 func CreateSurveyContributorService(id string, data models.CreateSurveyContributors) (models.SurveyContributors, error) {
 	return repository.CreateSurveyContributors(id, data)
 }
 
-func GetSurveyContributorsBySurveyIdService(surveyId string) ([]models.ViewSurveyContributors, error) {
+func GetSurveyContributorsBySurveyIdService(surveyId string) ([]models.SurveyContributors, error) {
 	contributors, err := repository.GetSurveyContributorsBySurveyId(surveyId)
 	if err != nil {
 		log.Println("[Service] Erro ao buscar survey contributors:", err)
 		return nil, err
 	}
 
-	var viewContributors []models.ViewSurveyContributors
-	for _, contributor := range contributors {
-		user, err := repository.GetUserById(contributor.UserId)
-		if err != nil {
-			log.Println("[Service] Erro ao buscar usuário do survey contributor:", err)
-			return nil, err
-		}
+	// var viewContributors []models.ViewSurveyContributors
+	// for _, contributor := range contributors {
+	// 	user, err := repository.GetUserById(contributor.UserId)
+	// 	if err != nil {
+	// 		log.Println("[Service] Erro ao buscar usuário do survey contributor:", err)
+	// 		return nil, err
+	// 	}
 
-		viewContributor := models.ViewSurveyContributors{
-			ID:          contributor.ID,
-			SurveyId:    contributor.SurveyId,
-			SurveyType:  contributor.SurveyType,
-			User:        models.SanitizeUser(user),
-			Instruction: contributor.Instruction,
-			CreatedAt:   contributor.CreatedAt,
-			UpdatedAt:   contributor.UpdatedAt,
-		}
+	// 	viewContributor := models.ViewSurveyContributors{
+	// 		ID:          contributor.ID,
+	// 		SurveyId:    contributor.SurveyId,
+	// 		SurveyType:  contributor.SurveyType,
+	// 		User:        models.SanitizeUser(user),
+	// 		Instruction: contributor.Instruction,
+	// 		CreatedAt:   contributor.CreatedAt,
+	// 		UpdatedAt:   contributor.UpdatedAt,
+	// 	}
 
-		viewContributors = append(viewContributors, viewContributor)
-	}
+	// 	viewContributors = append(viewContributors, viewContributor)
+	// }
 
-	return viewContributors, nil
+	return contributors, nil
 }
 
-
-func DeleteSurveyContributorsByIdService(id, surveyId string) error {
-	return repository.DeleteSurveyContributorsById(id, surveyId)
+func DeleteSurveyContributorsByIdService(user_id, surveyId string) error {
+	return repository.DeleteSurveyContributorsById(user_id, surveyId)
 }
 
 
@@ -5957,7 +5965,6 @@ func GenerateUserToken(user models.User, tokenType string) (*models.Token, error
 	return token, nil
 }
 
-
 func GenerateJWTToken(user models.User) map[string]interface{} {
 	expire := time.Now().Add(time.Minute * time.Duration(JWTExpiresMinutes))
 
@@ -6021,6 +6028,7 @@ func generateRandomToken(length int) string {
 	return string(token)
 }
 
+
 ============================================================
 
 
@@ -6081,6 +6089,17 @@ func FetchUpdateUser(id string, user models.User) (models.User, error) {
 
 	if err != nil {
 		return models.User{}, err
+	}
+
+	if updatedData["status"] == "inactive" {
+		err := repository.RevokeAllTokensByUserID(id, "Bearer")
+
+		if err != nil {
+			log.Println("[FetchUpdateUser] Erro ao revogar tokens:", err)
+			return models.User{}, err
+		} else {
+			log.Println("[FetchUpdateUser] Tokens revogados com sucesso.")
+		}
 	}
 
 	return user, nil
