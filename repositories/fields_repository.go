@@ -19,6 +19,7 @@ func CreateField(surveyId, surveyType string, createFieldData models.CreateField
 		"input_type_id": createFieldData.InputTypeId,
 		"survey_id":     surveyId,
 		"survey_type":   surveyType,
+		"position":      createFieldData.Position,
 	}
 
 	_, err := supabase.From("fields").
@@ -90,6 +91,7 @@ func UpdateField(id, surveyId, surveyType string, updateFieldData models.CreateF
 		"title":         updateFieldData.Title,
 		"description":   updateFieldData.Description,
 		"input_type_id": updateFieldData.InputTypeId,
+		"position":      updateFieldData.Position,
 	}
 
 	_, err := supabase.From("fields").

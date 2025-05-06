@@ -143,11 +143,11 @@ func SetupRouter() *gin.Engine {
 		}
 
 		// Grupo de sincronização
-		// sync := api.Group("/sync")
-		// {
-		// 	sync.GET("/:entity", controllers.SyncGet)
-		// 	sync.PATCH("/:entity", controllers.SyncPatch)
-		// }
+		sync := api.Group("/sync")
+		{
+			sync.GET("/:entity", controllers.SyncGet)
+			sync.PATCH("/:entity", controllers.SyncPatch)
+		}
 
 		// Grupo de tipos de input
 		api.GET("/input_types", controllers.GetInputTypes)
