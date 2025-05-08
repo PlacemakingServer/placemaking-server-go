@@ -32,23 +32,24 @@ func CreateResearch(createResearchData models.CreateResearch) (models.Research, 
 	return research, nil
 }
 
-func GetAllResearches() ([]models.Research, error) {
+func GetAllResearches() ([]models.ContributorsResearch, error) {
 	supabase := db.GetSupabase()
 
-	var researches []models.Research
+	var researches []models.ContributorsResearch
 
 	_, err := supabase.From("researches").
-		Select("*", "", false).
-		Eq("status", "true"). // <-- filtrando por status = true
+		Select("*, research_contributors(id, user_id, instruction)", "", false). // join com a tabela de contribuidores
+		Eq("status", "true").
 		ExecuteTo(&researches)
 
 	if err != nil {
-		log.Println("Erro ao buscar pesquisas:", err)
+		log.Println("Erro ao buscar pesquisas com contribuidores:", err)
 		return nil, err
 	}
 
 	return researches, nil
 }
+
 
 func GetResearchById(id string) (models.Research, error) {
 	supabase := db.GetSupabase()
