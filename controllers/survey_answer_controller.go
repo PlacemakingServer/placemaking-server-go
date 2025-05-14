@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"net/url"
 	"placemaking-backend-go/models"
@@ -14,8 +15,11 @@ func CreateSurveyAnswer(c *gin.Context) {
 	surveyId := c.Param("surveyId")
 	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))
 	contributorId, _ := url.QueryUnescape(c.Query("contributor_id"))
+	
+	log.Println("piru:", contributorId)
 
 	var data models.CreateSurveyAnswer
+
 	if err := c.ShouldBindJSON(&data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Dados inválidos"})
 		return
