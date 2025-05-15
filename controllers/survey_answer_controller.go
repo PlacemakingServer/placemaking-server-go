@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 	"net/url"
 	"placemaking-backend-go/models"
