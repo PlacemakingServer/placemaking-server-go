@@ -16,8 +16,6 @@ func CreateSurveyAnswer(c *gin.Context) {
 	surveyType, _ := url.QueryUnescape(c.Query("survey_type"))
 	contributorId, _ := url.QueryUnescape(c.Query("contributor_id"))
 	
-	log.Println("piru:", contributorId)
-
 	var data models.CreateSurveyAnswer
 
 	if err := c.ShouldBindJSON(&data); err != nil {
