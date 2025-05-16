@@ -46,3 +46,16 @@ type UpdateResearch struct {
 	EndDate       string  `json:"end_date"`
 	Status        bool    `json:"status"`
 }
+
+type ContributorsResearch struct {
+	Id            string                `json:"id"`
+	Title         string                `json:"title"`
+	Description   string                `json:"description"`
+	ReleaseDate   string                `json:"release_date"`
+	CreatedBy     string                `json:"created_by"`
+	Lat           float32               `json:"lat"`
+	Long          float32               `json:"long"`
+	LocationTitle string                `json:"location_title"`
+	EndDate       string                `json:"end_date"`
+	Contributors  []ContributorSanitize `json:"research_contributors"`
+}

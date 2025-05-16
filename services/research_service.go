@@ -17,7 +17,7 @@ func FetchCreateResearch(createResearchData models.CreateResearch) (models.Resea
 	return research, nil
 }
 
-func FetchAllResearches() ([]models.Research, error) {
+func FetchAllResearches() ([]models.ContributorsResearch, error) {
 
 	researches, err := repository.GetAllResearches()
 	if err != nil {
@@ -50,6 +50,7 @@ func FetchAllResearches() ([]models.Research, error) {
 
 	return researches, nil
 }
+
 
 func FetchResearchById(id string) (models.ViewResearch, error) {
 

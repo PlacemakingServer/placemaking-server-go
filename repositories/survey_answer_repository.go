@@ -5,20 +5,27 @@ import (
 	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
 )
+	// Função auxiliar para converter "" em nil
+func ifEmptyNil(s string) interface{} {
+	if s == "" {
+		return nil
+	}
+	return s
+}
 
 func CreateSurveyAnswer(surveyId, surveyType, contributorId string, surveyAnswerData models.CreateSurveyAnswer) (models.SurveyAnswer, error) {
 	supabase := db.GetSupabase()
 
 	// Convertendo para map[string]interface{}
 	insertData := map[string]interface{}{
-		"value":      surveyAnswerData.Value,
-		"survey_id":   surveyId,
-		"survey_type": surveyType,
-		"contributor_id": contributorId,
-		"registered_at": surveyAnswerData.RegisteredAt,
-		"survey_group_id": surveyAnswerData.SurveyGroupId,
-		"survey_time_range_id": surveyAnswerData.SurveyTimeRangeId,
-		"survey_region_id": surveyAnswerData.SurveyRegionId,
+		"value":                surveyAnswerData.Value,
+		"survey_id":            surveyId,
+		"survey_type":          surveyType,
+		"survey_contributor_id":       contributorId,
+		"registered_at":        surveyAnswerData.RegisteredAt,
+		"survey_group_id":      surveyAnswerData.SurveyGroupId,
+		"survey_time_range_id": ifEmptyNil(surveyAnswerData.SurveyTimeRangeId),
+		"survey_region_id":     ifEmptyNil(surveyAnswerData.SurveyRegionId),
 	}
 
 	var createdSurveyAnswer models.SurveyAnswer
@@ -64,7 +71,7 @@ func GetAllAnswersByContributorId(contributorId string) ([]models.SurveyAnswer, 
 
 	_, err := supabase.From("survey_answers").
 		Select("*", "", false).
-		Eq("contributor_id", contributorId).
+		Eq("survey_contributor_id", contributorId).
 		ExecuteTo(&surveyAnswers)
 
 	if err != nil {
