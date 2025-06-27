@@ -16,6 +16,7 @@ func SetupRouter() *gin.Engine {
 		"POST /api/v1/auth/register":        true,
 		"POST /api/v1/auth/forgot_password": true,
 		"POST /api/v1/auth/validate_code":   true,
+		"GET /api/v1/hello":                 true,
 	}
 
 	// Todas as rotas dentro de /api/v1 passam pelo middleware
@@ -23,6 +24,11 @@ func SetupRouter() *gin.Engine {
 	api.Use(middleware.JWTAuthMiddleware(publicRoutes))
 	{
 		// Grupo de autenticação
+
+		hello := api.Group("/hello")
+		{
+			hello.GET("", controllers.Hello)
+		}
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", controllers.Login)
