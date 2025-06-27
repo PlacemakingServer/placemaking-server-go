@@ -5,7 +5,8 @@ import (
 	"placemaking-backend-go/db"
 	"placemaking-backend-go/models"
 )
-	// Função auxiliar para converter "" em nil
+
+// Função auxiliar para converter "" em nil
 func ifEmptyNil(s string) interface{} {
 	if s == "" {
 		return nil
@@ -18,14 +19,15 @@ func CreateSurveyAnswer(surveyId, surveyType, contributorId string, surveyAnswer
 
 	// Convertendo para map[string]interface{}
 	insertData := map[string]interface{}{
-		"value":                surveyAnswerData.Value,
-		"survey_id":            surveyId,
-		"survey_type":          surveyType,
-		"survey_contributor_id":       contributorId,
-		"registered_at":        surveyAnswerData.RegisteredAt,
-		"survey_group_id":      surveyAnswerData.SurveyGroupId,
-		"survey_time_range_id": ifEmptyNil(surveyAnswerData.SurveyTimeRangeId),
-		"survey_region_id":     ifEmptyNil(surveyAnswerData.SurveyRegionId),
+		"value":                 surveyAnswerData.Value,
+		"survey_id":             surveyId,
+		"survey_type":           surveyType,
+		"survey_contributor_id": contributorId,
+		"field_id":              surveyAnswerData.FieldId,
+		"registered_at":         surveyAnswerData.RegisteredAt,
+		"survey_group_id":       surveyAnswerData.SurveyGroupId,
+		"survey_time_range_id":  ifEmptyNil(surveyAnswerData.SurveyTimeRangeId),
+		"survey_region_id":      ifEmptyNil(surveyAnswerData.SurveyRegionId),
 	}
 
 	var createdSurveyAnswer models.SurveyAnswer
@@ -51,7 +53,7 @@ func GetAllSurveyAnswersBySurveyId(surveyId string) ([]models.SurveyAnswer, erro
 	var surveyAnswers []models.SurveyAnswer
 
 	_, err := supabase.From("survey_answers").
-		Select("*", "", false).
+		Select("*, contributor_id:survey_contributor_id", "", false).
 		Eq("survey_id", surveyId).
 		ExecuteTo(&surveyAnswers)
 
@@ -109,7 +111,7 @@ func DeleteSurveyAnswerById(id string) ([]models.SurveyAnswer, error) {
 	var deletedAnswers []models.SurveyAnswer
 
 	_, err := supabase.From("survey_answers").
-		Delete("","").
+		Delete("", "").
 		Eq("id", id).
 		ExecuteTo(&deletedAnswers)
 
@@ -126,11 +128,12 @@ func UpdateSurveyAnswerById(id string, surveyAnswerData models.UpdateSurveyAnswe
 
 	// Convertendo para map[string]interface{}
 	updateData := map[string]interface{}{
-		"value":      surveyAnswerData.Value,
-		"registered_at": surveyAnswerData.RegisteredAt,
-		"survey_group_id": surveyAnswerData.SurveyGroupId,
+		"value":                surveyAnswerData.Value,
+		"registered_at":        surveyAnswerData.RegisteredAt,
+		"survey_group_id":      surveyAnswerData.SurveyGroupId,
 		"survey_time_range_id": surveyAnswerData.SurveyTimeRangeId,
-		"survey_region_id": surveyAnswerData.SurveyRegionId,
+		"survey_region_id":     surveyAnswerData.SurveyRegionId,
+		"field_id":             surveyAnswerData.FieldId,
 	}
 
 	var updatedSurveyAnswer models.SurveyAnswer

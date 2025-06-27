@@ -10,6 +10,7 @@ type SurveyAnswer struct {
 	RegisteredAt      string  `json:"registered_at"`
 	SurveyTimeRangeId string  `json:"survey_time_range_id"`
 	SurveyRegionId    string  `json:"survey_region_id"`
+	FieldId           string  `json:"field_id"`
 }
 
 type CreateSurveyAnswer struct {
@@ -18,6 +19,7 @@ type CreateSurveyAnswer struct {
 	SurveyTimeRangeId string  `json:"survey_time_range_id"`
 	RegisteredAt      string  `json:"registered_at"`
 	SurveyRegionId    string  `json:"survey_region_id"`
+	FieldId           string  `json:"field_id"`
 }
 
 type UpdateSurveyAnswer struct {
@@ -26,4 +28,5 @@ type UpdateSurveyAnswer struct {
 	SurveyTimeRangeId string  `json:"survey_time_range_id"`
 	RegisteredAt      string  `json:"registered_at"`
 	SurveyRegionId    string  `json:"survey_region_id"`
+	FieldId           string  `json:"field_id"`
 }
